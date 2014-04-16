@@ -1,0 +1,6 @@
+name = Boston College Customizations
+description = "Misc customizations for Boston College"
+package = Islandora
+dependencies[] = islandora_scholar
+version = 7.x-dev
+core = 7.x

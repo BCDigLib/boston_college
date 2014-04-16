@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations for Boston College.
+ */
+
+/**
+ * Implements hook_menu_alter().
+ */
+function boston_college_menu_alter(&$items) {
+  // Swap in our alternate form.
+  $items['islandora/object/%islandora_object/islandora_scholar_upload'] = array(
+    'file path' => drupal_get_path('module', 'boston_college'),
+    'file' => 'includes/document.tab.inc',
+    'page callback' => 'boston_college_document_view',
+  ) + $items['islandora/object/%islandora_object/islandora_scholar_upload'];
+}
+
+/**
+ * Implements hook_islandora_ingest_steps_alter().
+ */
+function boston_college_islandora_ingest_steps_alter(&$steps, &$form_state) {
+  unset($steps['islandora_scholar_file_upload']);
+}
+
+/**
+ * Implements hook_islandora_ingest_steps().
+ */
+function boston_college_islandora_ingest_steps(array $form_state) {
+  $models = array(
+    'ir:citationCModel',
+    'ir:thesisCModel',
+  );
+
+  $steps = array();
+  $shared_storage = islandora_ingest_form_get_shared_storage($form_state);
+
+  if (array_intersect($models, $shared_storage['models'])) {
+    $steps['boston_college_document_upload'] = array(
+      'weight' => 10,
+      'type' => 'form',
+      'form_id' => 'boston_college_document_upload_ingest_step_form',
+      'module' => 'boston_college',
+      'file' => 'includes/document.ingest_step.inc',
+    );
+  }
+
+  return $steps;
+}
