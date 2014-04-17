@@ -24,6 +24,13 @@ function boston_college_document_upload_form_base(&$form, $defaults = array()) {
     '#type' => 'markup',
   );
   $upload =& $form['upload_document'];
+  $upload['statement'] = array(
+    '#type' => 'item',
+    '#markup' => t('This submission form applies only to text-based faculty publications. Please upload the associated document in PDF format and indicate the version of the document by checking one of the boxes below. If you are interested in depositing other materials (such as videos or datasets), please contact !jane_link or !emily_link.', array(
+      '!jane_link' => l(t('Jane Morris'), 'mailto:jane.morris@bc.edu'),
+      '!emily_link' => l(t('Emily Toner'), 'mailto:emily.toner@bc.edu'),
+    )),
+  );
   $upload['file'] = array(
     '#type' => 'managed_file',
     '#title' => t('PDF File'),
