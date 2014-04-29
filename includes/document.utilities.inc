@@ -131,24 +131,30 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
     $document_version->nodeValue = $values['version'];
     $mods_root->appendChild($document_version);
   }
+
   $statement_list = boston_college_get_usage_statement_node_list($mods_xpath, $mods_root);
-  if ($statement_list->length === 0) {
-    $usage_statement = $mods_doc->createElement('accessCondtion');
-    $usage_statement->setAttribute('type', 'useAndReproduction');
+  $empty_checker = function ($element) {
+    $trimmed = trim($element->nodeValue);
+    return empty($trimmed);
+  };
+  $statement_array = iterator_to_array($statement_list, FALSE);
+  $empties = array_filter($statement_array, $empty_checker);
+  if (count($statement_array) > 0 && $empties == $statement_array) {
+    // There's no populated usage statement, so let's populate one (first)!
+    $usage_statement = reset($empties);
     $usage_statement->nodeValue = $values['usage_statement'];
-    $mods_root->appendChild($usage_statement);
   }
   else {
-    $empty_checker = function ($element) {
-      $trimmed = trim($element->nodeValue);
-      return empty($trimmed);
+    $usage_statement_value = trim($values['usage_statement']);
+    $matcher = function ($element) use ($usage_statement_value) {
+      return trim($element->nodeValue) == $usage_statement_value;
     };
-    $statement_array = iterator_to_array($statement_list, FALSE);
-    $empties = array_filter($statement_array, $empty_checker);
-    if ($empties == $statement_array) {
-      // There's no populated usage statement, so let's populate one (first)!
-      $usage_statement = reset($empties);
+    $matches = array_filter($statement_array, $matcher);
+    if (empty($matches)) {
+      $usage_statement = $mods_doc->createElement('accessCondtion');
+      $usage_statement->setAttribute('type', 'useAndReproduction');
       $usage_statement->nodeValue = $values['usage_statement'];
+      $mods_root->appendChild($usage_statement);
     }
   }
   $mods_datastream->content = $mods_doc->saveXML();
