@@ -134,7 +134,7 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
   $statement_list = boston_college_get_usage_statement_node_list($mods_xpath, $mods_root);
   if ($statement_list->length === 0) {
     $usage_statement = $mods_doc->createElement('accessCondtion');
-    $usage_statement->setAttribute('type', 'userAndReproduction');
+    $usage_statement->setAttribute('type', 'useAndReproduction');
     $usage_statement->nodeValue = $values['usage_statement'];
     $mods_root->appendChild($usage_statement);
   }
