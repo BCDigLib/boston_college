@@ -39,15 +39,16 @@ function boston_college_document_upload_form_base(&$form, $defaults = array()) {
       'file_validate_extensions' => array('pdf'),
     ),
   );
+  $options = array(
+    'Pre-print' => t('Pre-print: The version of the document originally submitted to the publisher, prior to peer review (also known as "Author\'s Submitted Manuscript").'),
+    'Post-print' => t('Post-print: The version of the document with changes from the peer-review process, i.e. the final manuscript but without the publisher\'s formatting (also known as "Author\'s Accepted Manuscript").'),
+    'Version of record' => t('Published PDF: The final formatted version of the document.'),
+    'Other' => t('Other: Unpublished documents, working papers, etc.'),
+  );
   $upload['version'] = array(
     '#type' => 'radios',
     '#title' => t('Document Version'),
-    '#options' => array(
-      'Pre-print' => t('The version of the document originally submitted to the publisher, prior to peer review (also known as "Author\'s Submitted Manuscript").'),
-      'Post-print' => t('The version of the document with changes from the peer-review process, i.e. the final manuscript but without the publisher\'s formatting (also known as "Author\'s Accepted Manuscript").'),
-      'Published PDF' => t('The final formatted version of the document.'),
-      'Other' => t('Unpublished documents, working papers, etc.'),
-    ),
+    '#options' => $options,
     '#required' => TRUE,
   );
   $upload['agreement'] = array(
@@ -70,6 +71,13 @@ Boston College will clearly identify my/our name(s) as the author(s) or owner(s)
       '!email_link' => l(t('Jane Morris'), 'mailto:jane.morris@bc.edu'),
     )),
   );
+  $statement = <<<EOSTMT
+These materials are made available for use in research, teaching and private study, pursuant to U.S. Copyright Law. The user must assume full responsibility for any use of the materials, including but not limited to, infringement of copyright and publication rights of reproduced materials. Any materials used for academic research or otherwise should be fully credited with the source. The publisher or original authors may retain copyright to the materials.
+EOSTMT;
+  $upload['usage_statement'] = array(
+    '#type' => 'value',
+    '#value' => trim($statement),
+  );
 
   foreach (array_intersect_key($defaults, $upload) as $field => $default) {
     $upload[$field]['#default_value'] = $default;
@@ -83,6 +91,8 @@ Boston College will clearly identify my/our name(s) as the author(s) or owner(s)
  *   An associative array containing:
  *   - version: The version of the document (a string), to throw into the MODS.
  *   - file: A Drupal file ID we will load to get the PDF.
+ *   - usage_statement: A string containing the usage statement to add into the
+ *     MODS.
  * @param AbstractObject $object
  *   The object to update. Must not contain a "PDF" datastream, and must
  *   contain a "MODS" datastream.
@@ -112,10 +122,41 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
   $mods_xpath->registerNamespace('mods', 'http://www.loc.gov/mods/v3');
   $mods_root = boston_college_get_mods_root($mods_xpath);
   boston_college_clear_versions($mods_xpath, $mods_root);
-  $document_version = $mods_doc->createElement('note');
-  $document_version->setAttribute('type', 'document_version');
-  $document_version->nodeValue = $values['version'];
-  $mods_root->appendChild($document_version);
+  $no_map = array(
+    'Other',
+  );
+  if (!in_array($values['version'], $no_map)) {
+    $document_version = $mods_doc->createElement('note');
+    $document_version->setAttribute('type', 'version information');
+    $document_version->nodeValue = $values['version'];
+    $mods_root->appendChild($document_version);
+  }
+
+  $statement_list = boston_college_get_usage_statement_node_list($mods_xpath, $mods_root);
+  $empty_checker = function ($element) {
+    $trimmed = trim($element->nodeValue);
+    return empty($trimmed);
+  };
+  $statement_array = iterator_to_array($statement_list, FALSE);
+  $empties = array_filter($statement_array, $empty_checker);
+  if (count($statement_array) > 0 && $empties == $statement_array) {
+    // There's no populated usage statement, so let's populate one (first)!
+    $usage_statement = reset($empties);
+    $usage_statement->nodeValue = $values['usage_statement'];
+  }
+  else {
+    $usage_statement_value = trim($values['usage_statement']);
+    $matcher = function ($element) use ($usage_statement_value) {
+      return trim($element->nodeValue) == $usage_statement_value;
+    };
+    $matches = array_filter($statement_array, $matcher);
+    if (empty($matches)) {
+      $usage_statement = $mods_doc->createElement('accessCondtion');
+      $usage_statement->setAttribute('type', 'useAndReproduction');
+      $usage_statement->nodeValue = $values['usage_statement'];
+      $mods_root->appendChild($usage_statement);
+    }
+  }
   $mods_datastream->content = $mods_doc->saveXML();
 }
 
@@ -156,7 +197,14 @@ function boston_college_get_mods_root(DOMXPath $mods_xpath) {
  * Helper function; get a list of all the "version" elements.
  */
 function boston_college_get_version_node_list(DOMXPath $mods_xpath, DOMElement $mods_root) {
-  return $mods_xpath->query('mods:note[@type="document_version"]', $mods_root);
+  return $mods_xpath->query('mods:note[@type="version information"]', $mods_root);
+}
+
+/**
+ * Helper function; get a list of all the usage statement elements.
+ */
+function boston_college_get_usage_statement_node_list(DOMXPath $mods_xpath, DOMElement $mods_root) {
+  return $mods_xpath->query('mods:accessCondition[@type="useAndReproduction"]', $mods_root);
 }
 
 /**
@@ -166,13 +214,8 @@ function boston_college_clear_versions(DOMXPath $mods_xpath, DOMElement $mods_ro
   $document_version_list = boston_college_get_version_node_list($mods_xpath, $mods_root);
   if ($document_version_list->length > 0) {
     // Clear out any pre-existing values.
-    $elements_to_remove = array();
-    foreach ($document_version_list as $document_version_element) {
-      $elements_to_remove[] = $document_version_element;
-    }
-    foreach ($elements_to_remove as $element_to_remove) {
-      $mods_root->removeChild($element_to_remove);
-    }
+    $elements_to_remove = iterator_to_array($document_version_list, FALSE);
+    array_map(array($mods_root, 'removeChild'), $elements_to_remove);
   }
 }
 
