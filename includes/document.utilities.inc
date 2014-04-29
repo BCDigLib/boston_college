@@ -43,7 +43,7 @@ function boston_college_document_upload_form_base(&$form, $defaults = array()) {
     'Pre-print' => t('Pre-print: The version of the document originally submitted to the publisher, prior to peer review (also known as "Author\'s Submitted Manuscript").'),
     'Post-print' => t('Post-print: The version of the document with changes from the peer-review process, i.e. the final manuscript but without the publisher\'s formatting (also known as "Author\'s Accepted Manuscript").'),
     'Version of record' => t('Published PDF: The final formatted version of the document.'),
-    'Other' => t('Unpublished documents, working papers, etc.'),
+    'Other' => t('Other: Unpublished documents, working papers, etc.'),
   );
   $upload['version'] = array(
     '#type' => 'radios',
@@ -76,7 +76,7 @@ These materials are made available for use in research, teaching and private stu
 EOSTMT;
   $upload['usage_statement'] = array(
     '#type' => 'value',
-    '#value' => $statement,
+    '#value' => trim($statement),
   );
 
   foreach (array_intersect_key($defaults, $upload) as $field => $default) {
@@ -138,6 +138,19 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
     $usage_statement->nodeValue = $values['usage_statement'];
     $mods_root->appendChild($usage_statement);
   }
+  else {
+    $empty_checker = function ($element) {
+      $trimmed = trim($element->nodeValue);
+      return empty($trimmed);
+    };
+    $statement_array = iterator_to_array($statement_list, FALSE);
+    $empties = array_filter($statement_array, $empty_checker);
+    if ($empties == $statement_array) {
+      // There's no populated usage statement, so let's populate one (first)!
+      $usage_statement = reset($empties);
+      $usage_statement->nodeValue = $values['usage_statement'];
+    }
+  }
   $mods_datastream->content = $mods_doc->saveXML();
 }
 
@@ -195,13 +208,8 @@ function boston_college_clear_versions(DOMXPath $mods_xpath, DOMElement $mods_ro
   $document_version_list = boston_college_get_version_node_list($mods_xpath, $mods_root);
   if ($document_version_list->length > 0) {
     // Clear out any pre-existing values.
-    $elements_to_remove = array();
-    foreach ($document_version_list as $document_version_element) {
-      $elements_to_remove[] = $document_version_element;
-    }
-    foreach ($elements_to_remove as $element_to_remove) {
-      $mods_root->removeChild($element_to_remove);
-    }
+    $elements_to_remove = iterator_to_array($document_version_list, FALSE);
+    array_map(array($mods_root, 'removeChild'), $elements_to_remove);
   }
 }
 
