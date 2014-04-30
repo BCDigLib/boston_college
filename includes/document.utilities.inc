@@ -127,7 +127,7 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
   );
   if (!in_array($values['version'], $no_map)) {
     $document_version = $mods_doc->createElement('note');
-    $document_version->setAttribute('type', 'version information');
+    $document_version->setAttribute('type', 'version identification');
     $document_version->nodeValue = $values['version'];
     $mods_root->appendChild($document_version);
   }
@@ -197,7 +197,7 @@ function boston_college_get_mods_root(DOMXPath $mods_xpath) {
  * Helper function; get a list of all the "version" elements.
  */
 function boston_college_get_version_node_list(DOMXPath $mods_xpath, DOMElement $mods_root) {
-  return $mods_xpath->query('mods:note[@type="version information"]', $mods_root);
+  return $mods_xpath->query('mods:note[@type="version identification"]', $mods_root);
 }
 
 /**
