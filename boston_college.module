@@ -79,3 +79,21 @@ function boston_college_image_field_caption_widget_process($element, &$form_stat
   $element['image_field_caption']['#description'] = t('The link the image will redirect to.');
   return $element;
 }
+
+/**
+ * Implements hook_islandora_derivative().
+ */
+function boston_college_islandora_derivative() {
+  $mod_path = drupal_get_path('module', 'boston_college');
+  return array(
+    array(
+      'source_dsid' => 'MODS',
+      'destination_dsid' => NULL,
+      'weight' => 0,
+      'function' => array(
+        'boston_college_update_object_label_from_mods_derivative',
+      ),
+      'file' => "$mod_path/includes/derivatives.inc",
+    ),
+  );
+}
