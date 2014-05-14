@@ -126,7 +126,7 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
     'Other',
   );
   if (!in_array($values['version'], $no_map)) {
-    $document_version = $mods_doc->createElement('note');
+    $document_version = $mods_doc->createElementNS($mods_root->namespaceURI, 'note');
     $document_version->setAttribute('type', 'version identification');
     $document_version->nodeValue = $values['version'];
     $mods_root->appendChild($document_version);
@@ -151,7 +151,7 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
     };
     $matches = array_filter($statement_array, $matcher);
     if (empty($matches)) {
-      $usage_statement = $mods_doc->createElement('accessCondtion');
+      $usage_statement = $mods_doc->createElementNS($mods_root->namespaceURI, 'accessCondition');
       $usage_statement->setAttribute('type', 'useAndReproduction');
       $usage_statement->nodeValue = $values['usage_statement'];
       $mods_root->appendChild($usage_statement);
