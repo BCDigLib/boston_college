@@ -151,7 +151,7 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
     };
     $matches = array_filter($statement_array, $matcher);
     if (empty($matches)) {
-      $usage_statement = $mods_doc->createElement('accessCondtion');
+      $usage_statement = $mods_doc->createElement('accessCondition');
       $usage_statement->setAttribute('type', 'useAndReproduction');
       $usage_statement->nodeValue = $values['usage_statement'];
       $mods_root->appendChild($usage_statement);
