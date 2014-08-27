@@ -27,7 +27,7 @@ function boston_college_document_upload_form($form, &$form_state, $object_id) {
     '#type' => 'actions',
     'submit' => array(
       '#type' => 'submit',
-      '#value' => t('Submit'),
+      '#value' => t('Submit PDF'),
     ),
   );
   return $form;
