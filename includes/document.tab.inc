@@ -9,7 +9,7 @@
  */
 function boston_college_document_view(AbstractObject $object) {
   if (isset($object['MODS'])) {
-    return drupal_get_form(isset($object['PDF']) ? 'boston_college_document_delete_form' : 'boston_college_document_upload_form', $object->id);
+    return drupal_get_form(isset($object[BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID]) ? 'boston_college_document_delete_form' : 'boston_college_document_upload_form', $object->id);
   }
   return array(
     '#markup' => t('No MODS present on object; we need it to be able to modify it.'),

@@ -5,6 +5,8 @@
  * Hook implementations for Boston College.
  */
 
+define('BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID', 'ARCHIVE-PDF');
+
 /**
  * Implements hook_menu_alter().
  */
@@ -83,9 +85,9 @@ function boston_college_image_field_caption_widget_process($element, &$form_stat
 /**
  * Implements hook_islandora_derivative().
  */
-function boston_college_islandora_derivative() {
+function boston_college_islandora_derivative(AbstractObject $object) {
   $mod_path = drupal_get_path('module', 'boston_college');
-  return array(
+  $derivatives = array(
     array(
       'source_dsid' => 'MODS',
       'destination_dsid' => NULL,
@@ -95,6 +97,15 @@ function boston_college_islandora_derivative() {
       ),
       'file' => "$mod_path/includes/derivatives.inc",
     ),
+  );
+
+  return $derivatives;
+}
+
+function boston_college_citation_models() {
+  return array(
+    'ir:citationCModel',
+    'ir:thesisCModel',
   );
 }
 
@@ -106,7 +117,7 @@ function boston_college_islandora_datastream_purged(AbstractObject $object, $dsi
     'ir:citationCModel',
     'ir:thesisCModel',
   );
-  if (!($dsid == 'PDF' && array_intersect($models, $object->models))) {
+  if (!($dsid == BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID && array_intersect($models, $object->models))) {
     return;
   }
 
@@ -115,7 +126,7 @@ function boston_college_islandora_datastream_purged(AbstractObject $object, $dsi
 
   $hook_filter = function ($hook_def) {
     return isset($hook_def['source_dsid']) && isset($hook_def['destination_dsid']) ?
-      $hook_def['source_dsid'] == 'PDF' :
+      $hook_def['source_dsid'] == BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID :
       FALSE;
   };
   $hooks = array_filter($hooks, $hook_filter);
