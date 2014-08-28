@@ -10,6 +10,11 @@ This module requires the following modules/libraries:
 
 * [Islandora](https://github.com/islandora/islandora)
 
+Utilities used include:
+
+* [pdftk](https://www.pdflabs.com/tools/pdftk-server/)
+* [Apache FOP](http://xmlgraphics.apache.org/fop/)
+
 ## Installation
 
 Install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.

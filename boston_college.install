@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Module (un)installation and update hooks.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function boston_college_uninstall() {
+  $variables = array(
+    'boston_college_fop_executable',
+    'boston_college_pdftk_executable',
+    'boston_college_splash_xsl',
+  );
+  array_map('variable_del', $variables);
+}

@@ -155,3 +155,20 @@ function boston_college_islandora_datastream_purged(AbstractObject $object, $dsi
   $dsids = array_map($dsid_map, $hooks);
   array_map(array($object, 'purgeDatastream'), $dsids);
 }
+
+/**
+ * Implements hook_menu().
+ */
+function boston_college_menu() {
+  $items = array();
+
+  $items['admin/islandora/boston_college'] = array(
+    'title' => 'Boston College Configuration',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('boston_college_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/admin.form.inc',
+  );
+
+  return $items;
+}

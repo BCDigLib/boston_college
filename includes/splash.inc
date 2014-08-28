@@ -101,7 +101,7 @@ function boston_college_run_fop($input_mods) {
   $output = file_create_filename('splash.pdf', 'temporary://');
   touch(drupal_realpath($output));
   $args = array(
-    variable_get('boston_college_fop_executable', 'fop'),
+    variable_get('boston_college_fop_executable', '/usr/bin/fop'),
     '-xml',
     '-',
     '-xsl',
@@ -161,7 +161,7 @@ function boston_college_concat_pdfs(array $input_pdfs) {
   $output = file_create_filename('concatted.pdf', 'temporary://');
   touch(drupal_realpath($output));
   $args = array(
-    variable_get('boston_college_pdftk_executable', 'pdftk'),
+    variable_get('boston_college_pdftk_executable', '/usr/bin/pdftk'),
   );
   $args = array_merge($args, $pdfs);
   $args = array_merge($args, array(
