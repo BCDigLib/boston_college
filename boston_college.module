@@ -96,6 +96,18 @@ function boston_college_islandora_derivative(AbstractObject $object) {
     ),
   );
 
+  $models = boston_college_citation_models();
+  if (array_intersect($models, $object->models)) {
+    $derivatives[] = array(
+      'source_dsid' => BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID,
+      'destination_dsid' => 'PDF',
+      'function' => array(
+        'boston_college_build_pdf',
+      ),
+      'file' => "$mod_path/includes/splash.inc",
+    );
+  }
+
   return $derivatives;
 }
 
@@ -117,17 +129,21 @@ function boston_college_citation_models() {
  */
 function boston_college_islandora_datastream_purged(AbstractObject $object, $dsid) {
   $models = boston_college_citation_models();
+  $purge_derived_dsids = array(
+    BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID,
+    'PDF',
+  );
 
-  if (!($dsid == BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID && array_intersect($models, $object->models))) {
+  if (!(in_array($dsid, $purge_derived_dsids) && array_intersect($models, $object->models))) {
     return;
   }
 
   module_load_include('inc', 'islandora', 'includes/utilities');
   $hooks = islandora_invoke_hook_list(ISLANDORA_DERVIATIVE_CREATION_HOOK, $object->models, array($object));
 
-  $hook_filter = function ($hook_def) {
+  $hook_filter = function ($hook_def) use ($purge_derived_dsids) {
     return isset($hook_def['source_dsid']) && isset($hook_def['destination_dsid']) ?
-      $hook_def['source_dsid'] == BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID :
+      in_array($hook_def['source_dsid'], $purge_derived_dsids) :
       FALSE;
   };
   $hooks = array_filter($hooks, $hook_filter);
