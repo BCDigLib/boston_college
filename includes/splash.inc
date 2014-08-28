@@ -5,7 +5,10 @@
  * Derivative callbacks and associated functions used in building splash page.
  */
 
-function boston_college_build_pdf($object, $force = FALSE, $hook) {
+/**
+ * Derivative callback to create PDF with splash page prepended.
+ */
+function boston_college_build_pdf($object, $force, $hook) {
   if (!$force && isset($object['PDF'])) {
     return;
   }
@@ -30,7 +33,7 @@ function boston_college_build_pdf($object, $force = FALSE, $hook) {
     return $to_return;
   }
 
-  // Create copy w/ splash & ARCHIVE-PDF concatted
+  // Create copy w/ splash & ARCHIVE-PDF concatted.
   $archive_pdf_uri = file_create_filename('archive-pdf.pdf', 'temporary://');
   touch(drupal_realpath($archive_pdf_uri));
   $object[BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID]->getContent($archive_pdf_uri);
@@ -137,6 +140,16 @@ function boston_college_run_fop($input_mods) {
   }
 }
 
+/**
+ * Concatenate an array of PDFs into a single PDF.
+ *
+ * @param string[] $input_pdfs
+ *   An array of string representing file URIs/name.
+ *
+ * @return object|bool
+ *   A Drupal file-object containing the concatenated PDF on success;
+ *   otherwise, boolean FALSE on failure.
+ */
 function boston_college_concat_pdfs(array $input_pdfs) {
   if (empty($input_pdfs)) {
     // Nothing to join, you silly.
