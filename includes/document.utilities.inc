@@ -94,7 +94,7 @@ EOSTMT;
  *   - usage_statement: A string containing the usage statement to add into the
  *     MODS.
  * @param AbstractObject $object
- *   The object to update. Must not contain a "PDF" datastream, and must
+ *   The object to update. Must not contain a PDF datastream, and must
  *   contain a "MODS" datastream.
  *
  * @throws Exception
@@ -108,7 +108,7 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
 
   // Add the PDF.
   $pdf_file = file_load($values['file']);
-  $pdf_datastream = $object->constructDatastream('PDF', 'M');
+  $pdf_datastream = $object->constructDatastream(BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID, 'M');
   $pdf_datastream->mimetype = 'application/pdf';
   $pdf_datastream->label = 'PDF Datastream';
   $pdf_datastream->setContentFromFile($pdf_file->uri);
@@ -167,7 +167,7 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
  *   The object to affect.
  */
 function boston_college_upload_document_undo(AbstractObject $object) {
-  $object->purgeDatastream('PDF');
+  $object->purgeDatastream(BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID);
 
   // Update the MODS.
   $mods_datastream = $object['MODS'];
