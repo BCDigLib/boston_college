@@ -45,3 +45,58 @@ function boston_college_update_object_label_from_mods_derivative(AbstractObject 
     ),
   );
 }
+
+/**
+ * Creates a redirect stream for streaming a video.
+ *
+ * @see hook_islandora_derivative()
+ */
+function boston_college_create_stream(AbstractObject $object, $force = FALSE) {
+  if (($force || !isset($object['STREAM'])) && isset($object['MODS'])) {
+    $mods_xml = new SimpleXMLElement($object['MODS']->content);
+    $streams = $mods_xml->xpath('/mods:mods/mods:location/mods:url');
+    $stream = (string) reset($streams);
+    // Bail out if stream is not valid URL (Fedora goes 500).
+    if (!filter_var($stream, FILTER_VALIDATE_URL)) {
+      return array(
+        'success' => FALSE,
+        'messages' => array(
+          array(
+            'message' => t('Failed to derive STREAM for @pid, URL invalid.'),
+            'message_sub' => array(
+              '@pid' => $object->id,
+            ),
+            'type' => 'dsm',
+          ),
+        ),
+      );
+    }
+
+    if (isset($object['STREAM'])) {
+      $datastream = $object['STREAM'];
+    }
+    else {
+      $datastream = $object->constructDatastream('STREAM', 'R');
+      $datastream->mimetype = 'text/html';
+      $datastream->label = 'Video player HTML page.';
+    }
+
+    $datastream->url = $stream;
+    // Doesn't do anything if ingested already.
+    $object->ingestDatastream($datastream);
+
+    return array(
+      'success' => TRUE,
+      'messages' => array(
+        array(
+          'message' => t('Derived STREAM for @pid.'),
+          'message_sub' => array(
+            '@pid' => $object->id,
+          ),
+          'type' => 'dsm',
+        ),
+      ),
+    );
+  }
+  return array();
+}
