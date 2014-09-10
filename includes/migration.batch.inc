@@ -27,7 +27,7 @@ class BostonCollegeBatchPreprocessor extends IslandoraScanBatch {
 class BostonCollegeBatchObject extends IslandoraScanBatchObject {
   protected $sourceXML;
   protected $type;
-  protected $pdf_uri;
+  protected $pdfURI;
   protected static $typeMappings;
   /**
    * Constructs an object for Boston College.
@@ -70,7 +70,7 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     $archival_xpath = $xml->xpath('/xb:digital_entity_result/xb:digital_entity/stream_ref[file_extension/text() = "pdf"]/file_name');
     if ($archival_xpath) {
       $pdf_name = (string) reset($archival_xpath);
-      $this->pdf_uri = $this->preprocessorParameters['target'] . '/' . $pdf_name;
+      $this->pdfURI = $this->preprocessorParameters['target'] . '/' . $pdf_name;
     }
     else {
       drush_log(t('Unable to match a PDF for @file', array('@file' => $this->objectInfo['xml']->uri)));
@@ -111,6 +111,10 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     $xml->registerXPathNamespace('xb', 'http://com/exlibris/digitool/repository/api/xmlbeans');
     $this->sourceXML = $xml;
     $this->getArchivalPDF();
+
+    if ($this->type == 'dc') {
+      $this->getEventHistory();
+    }
     return parent::batchProcess();
   }
 
@@ -217,12 +221,33 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
    * Gets the archival PDF to be added.
    */
   protected function getArchivalPDF() {
-    if ($this->pdf_uri) {
+    if ($this->pdfURI) {
       $pdf_datastream = $this->constructDatastream(BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID, 'M');
       $pdf_datastream->mimetype = 'application/pdf';
       $pdf_datastream->label = 'PDF Datastream';
-      $pdf_datastream->setContentFromFile($this->pdf_uri);
+      $pdf_datastream->setContentFromFile($this->pdfURI);
       $this->ingestDatastream($pdf_datastream);
+    }
+  }
+
+  /**
+   * Creates the event history datastream for graduate objects.
+   */
+  protected function getEventHistory() {
+    $event_xpath = $this->sourceXML->xpath('/xb:digital_entity_result/xb:digital_entity/mds/md[type/text() = "changehistory_md"]/value');
+    if ($event_xpath) {
+      $history = (string) reset($event_xpath);
+      $history = simplexml_load_string($history);
+      $history->registerXPathNamespace('xb', 'http://com/exlibris/digitool/repository/api/xmlbeans');
+      $deposit_xpath = $history->xpath('/xb:history/events/event[eventIdentifier/eventIdentifierType/text() = "DEPOSIT ID"]');
+      if ($deposit_xpath) {
+        $deposit = reset($deposit_xpath);
+        $archive_datastream = $this->constructDatastream('ARCHIVE', 'M');
+        $archive_datastream->mimetype = 'application/xml';
+        $archive_datastream->label = 'Event History';
+        $archive_datastream->content = $deposit->saveXML();
+        $this->ingestDatastream($archive_datastream);
+      }
     }
   }
   /**
@@ -246,6 +271,12 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     }
   }
 
+  /**
+   * No resources needed.
+   *
+   * @return array
+   *   The empty array of no resources.
+   */
   public function getResources() {
     return array();
   }

@@ -98,7 +98,6 @@ function boston_college_islandora_derivative(AbstractObject $object) {
 
   $models = boston_college_citation_models();
   if (array_intersect($models, $object->models)) {
-    dsm('deriv?');
     $derivatives[] = array(
       'source_dsid' => BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID,
       'destination_dsid' => 'PDF',
