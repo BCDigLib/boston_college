@@ -46,7 +46,7 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         'etd-ms' => array(
           'content_model' => 'ir:graduateETDCModel',
           'collection' => 'ir:citation',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/EDTMS_MODS3-4_XSLT1-0.xsl',
+          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
         'mods' => array(
           'content_model' => 'ir:undergraduateETDCModel',
@@ -92,7 +92,7 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         'etd-ms' => array(
           'content_model' => 'ir:graduateETDCModel',
           'collection' => 'ir:citation',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/EDTMS_MODS3-4_XSLT1-0.xsl',
+          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
         'mods' => array(
           'content_model' => 'ir:undergraduateETDCModel',

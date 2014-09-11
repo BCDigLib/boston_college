@@ -98,6 +98,7 @@ function boston_college_islandora_derivative(AbstractObject $object) {
 
   $models = boston_college_citation_models();
   if (array_intersect($models, $object->models)) {
+    module_load_include('inc', 'islandora_scholar', 'includes/utilities');
     $derivatives[] = array(
       'source_dsid' => BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID,
       'destination_dsid' => 'PDF',
@@ -106,6 +107,7 @@ function boston_college_islandora_derivative(AbstractObject $object) {
       ),
       'file' => "$mod_path/includes/splash.inc",
     );
+    $derivatives = array_merge($derivatives, islandora_scholar_get_derivatives());
   }
 
   return $derivatives;
@@ -173,4 +175,14 @@ function boston_college_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_islandora_view_object().
+ */
+function boston_college_islandora_view_object(AbstractObject $object) {
+  if (array_intersect(array('ir:undergraduateETDCModel', 'ir:graduateETDCModel'), $object->models)) {
+    module_load_include('inc', 'islandora_scholar', 'includes/utilities');
+    return islandora_scholar_get_view($object);
+  }
 }
