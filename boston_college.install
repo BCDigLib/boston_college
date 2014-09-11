@@ -2,8 +2,16 @@
 
 /**
  * @file
- * Module (un)installation and update hooks.
+ * Module installation and update hooks.
  */
+
+/**
+ * Implements hook_install().
+ */
+function boston_college_install() {
+  module_load_include('inc', 'islandora', 'includes/solution_packs');
+  islandora_install_solution_pack('boston_college');
+}
 
 /**
  * Implements hook_uninstall().
@@ -15,4 +23,7 @@ function boston_college_uninstall() {
     'boston_college_splash_xsl',
   );
   array_map('variable_del', $variables);
+
+  module_load_include('inc', 'islandora', 'includes/solution_packs');
+  islandora_install_solution_pack('boston_college', 'uninstall');
 }
