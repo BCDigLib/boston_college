@@ -230,7 +230,7 @@ function boston_college_islandora_xml_form_builder_form_associations() {
 }
 
 /**
- * Implements hook_islandora_ingest_steps().
+ * Implements hook_islandora_CMODEL_PID_ingest_steps().
  */
 function boston_college_islandora_BCVideo_islandora_ingest_steps() {
   return array(

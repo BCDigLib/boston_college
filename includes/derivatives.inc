@@ -62,9 +62,10 @@ function boston_college_create_stream(AbstractObject $object, $force = FALSE) {
         'success' => FALSE,
         'messages' => array(
           array(
-            'message' => t('Failed to derive STREAM for @pid, URL invalid.'),
+            'message' => t('Failed to derive STREAM for @pid, URL "!url" invalid.'),
             'message_sub' => array(
               '@pid' => $object->id,
+              '!url' => $stream,
             ),
             'type' => 'dsm',
           ),
