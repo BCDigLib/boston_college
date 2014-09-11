@@ -6,6 +6,8 @@
  */
 
 define('BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID', 'ARCHIVE-PDF');
+define('BOSTON_COLLEGE_VIDEO_CONTENT_MODEL', 'islandora:BCVideo');
+define('BOSTON_COLLEGE_VIDEO_FORM', 'BC Video MODS Form');
 
 /**
  * Implements hook_menu_alter().
@@ -82,7 +84,7 @@ function boston_college_image_field_caption_widget_process($element, &$form_stat
 /**
  * Implements hook_islandora_derivative().
  */
-function boston_college_islandora_derivative(AbstractObject $object) {
+function boston_college_islandora_derivative(AbstractObject $object = NULL) {
   $mod_path = drupal_get_path('module', 'boston_college');
   $derivatives = array(
     array(
@@ -171,4 +173,99 @@ function boston_college_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Implements islandora_required_objects().
+ */
+function boston_college_islandora_required_objects(IslandoraTuque $connection) {
+  $module_path = drupal_get_path('module', 'boston_college');
+  // Video Content Model.
+  $video_content_model = $connection->repository->constructObject(BOSTON_COLLEGE_VIDEO_CONTENT_MODEL);
+  $video_content_model->owner = 'fedoraAdmin';
+  $video_content_model->label = 'Boston College Video Content Model';
+  $video_content_model->models = 'fedora-system:ContentModel-3.0';
+  // DS-COMPOSITE-MODEL Datastream.
+  $datastream = $video_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'X');
+  $datastream->label = 'DS-COMPOSITE-MODEL';
+  $datastream->mimetype = 'application/xml';
+  $datastream->setContentFromFile("$module_path/xml/boston_college_video_ds_composite.xml", FALSE);
+  $video_content_model->ingestDatastream($datastream);
+
+  return array(
+    'boston_college' => array(
+      'title' => 'Boston College',
+      'objects' => array(
+        $video_content_model,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements islandora_xml_form_builder_forms().
+ */
+function boston_college_islandora_xml_form_builder_forms() {
+  return array(
+    BOSTON_COLLEGE_VIDEO_FORM => array(
+      'form_file' => drupal_get_path('module', 'boston_college') . '/xml/bc_video_mods_form.xml',
+    ),
+  );
+}
+
+/**
+ * Implements hook_islandora_xml_form_builder_form_associations().
+ */
+function boston_college_islandora_xml_form_builder_form_associations() {
+  return array(
+    'boston_college_video_mods_form' => array(
+      'content_model' => BOSTON_COLLEGE_VIDEO_CONTENT_MODEL,
+      'form_name' => BOSTON_COLLEGE_VIDEO_FORM,
+      'dsid' => 'MODS',
+      'title_field' => array('titleInfo', 'title'),
+      'transform' => 'mods_to_dc.xsl',
+      'template' => FALSE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_islandora_CMODEL_PID_ingest_steps().
+ */
+function boston_college_islandora_BCVideo_islandora_ingest_steps() {
+  return array(
+    'boston_college_upload' => array(
+      'weight' => 10,
+      'type' => 'form',
+      'form_id' => 'boston_college_video_upload_form',
+      'module' => 'boston_college',
+      'file' => 'includes/video_upload.form.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_islandora_CMODEL_PID_derivative().
+ */
+function boston_college_islandora_BCVideo_islandora_derivative() {
+  return array(
+    array(
+      'source_dsid' => 'OBJ',
+      'destination_dsid' => 'TN',
+      'weight' => '0',
+      'function' => array(
+        'islandora_video_create_thumbnail',
+      ),
+      'file' => drupal_get_path('module', 'islandora_video') . '/includes/derivatives.inc',
+    ),
+    array(
+      'source_dsid' => 'MODS',
+      'destination_dsid' => 'STREAM',
+      'weight' => '0',
+      'function' => array(
+        'boston_college_create_stream',
+      ),
+      'file' => drupal_get_path('module', 'boston_college') . '/includes/derivatives.inc',
+    ),
+  );
 }
