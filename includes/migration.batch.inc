@@ -5,6 +5,17 @@
  */
 
 class BostonCollegeBatchPreprocessor extends IslandoraScanBatch {
+
+  /**
+   * Sets recursive scasn to false.
+   *
+   * @see IslandoraScanBatch::__consruct
+   */
+  public function __construct(IslandoraTuque $connection, array $parameters) {
+    parent::__construct($connection, $parameters);
+    $this->recursiveScan = FALSE;
+  }
+
   /**
    * Get the pattern to sniff files for.
    *
@@ -48,8 +59,13 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
           'collection' => 'ir:citation',
           'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
-        'mods' => array(
+        'modstext' => array(
           'content_model' => 'ir:undergraduateETDCModel',
+          'collection' => 'ir:citation',
+          'transform' => 'MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+        ),
+        'modsvideo' => array(
+          'content_model' => 'bc:VIDEO',
           'collection' => 'ir:citation',
           'transform' => 'MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
@@ -73,7 +89,9 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
       $this->pdfURI = $this->preprocessorParameters['target'] . '/' . $pdf_name;
     }
     else {
-      drush_log(t('Unable to match a PDF for @file', array('@file' => $this->objectInfo['xml']->uri)));
+      if ($type != 'modsvideo') {
+        drush_log(t('Unable to match a PDF for @file', array('@file' => $this->objectInfo['xml']->uri)));
+      }
     }
   }
 
@@ -94,8 +112,13 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
           'collection' => 'ir:citation',
           'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
-        'mods' => array(
+        'modstext' => array(
           'content_model' => 'ir:undergraduateETDCModel',
+          'collection' => 'ir:citation',
+          'transform' => 'MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+        ),
+        'modsvideo' => array(
+          'content_model' => 'bc:VIDEO',
           'collection' => 'ir:citation',
           'transform' => 'MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
@@ -115,6 +138,10 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     if ($this->type == 'dc') {
       $this->getEventHistory();
     }
+
+    if ($this->type == 'modsvideo') {
+      $this->getArchivalVideo();
+    }
     return parent::batchProcess();
   }
 
@@ -131,6 +158,18 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     $type_xpath = $xml->xpath('/xb:digital_entity_result/xb:digital_entity/mds/md[name/text() = "descriptive"]/type');
     if ($type_xpath) {
       $type = (string) reset($type_xpath);
+      if ($type == 'mods') {
+        $entity_xpath = $xml->xpath('/xb:digital_entity_result/xb:digital_entity/control/entity_type/text()');
+        if ($entity_xpath) {
+          $entity = (string) reset($entity_xpath);
+          if ($entity == 'VIDEO_STREAM') {
+            $type = 'modsvideo';
+          }
+          else {
+            $type = 'modstext';
+          }
+        }
+      }
       return $type;
     }
     return FALSE;
@@ -187,6 +226,11 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
             ),
             'value' => $digi_pid,
           );
+        }
+
+        // For videos we need to set the location.
+        if ($this->type == 'modsvideo') {
+          
         }
 
         foreach ($mods_to_add as $values) {
@@ -250,6 +294,11 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
       }
     }
   }
+
+  protected function getArchivalVideo() {
+
+  }
+
   /**
    * Add relationships to the object.
    *
