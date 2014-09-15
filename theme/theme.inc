@@ -16,12 +16,17 @@ function theme_boston_college_video($variables) {
   // Core fieldset JS.
   drupal_add_js('misc/form.js');
   drupal_add_js('misc/collapse.js');
-  $source = $object['STREAM']->url;
+  if (isset($object['STREAM'])) {
+    $viewer = "<iframe src=\"{$object['STREAM']->url}\" width=\"400px\" height=\"305px\"></iframe>";
+  }
+  else {
+    $viewer = '';
+  }
   return array(
     // Magic dimensions to work with STREAM. Using markup to avoid firefox self
     // closing iframe bug.
     'viewer' => array(
-      '#markup' => "<iframe src=\"$source\" width=\"400px\" height=\"305px\"></iframe>",
+      '#markup' => $viewer,
     ),
     'description' => array('#markup' => $variables['description']),
     'metadata' => array('#markup' => $variables['metadata']),
