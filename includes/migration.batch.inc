@@ -5,26 +5,6 @@
  */
 
 class BostonCollegeBatchPreprocessor extends IslandoraScanBatch {
-
-  /**
-   * Sets recursive scasn to false.
-   *
-   * @see IslandoraScanBatch::__consruct
-   */
-  public function __construct(IslandoraTuque $connection, array $parameters) {
-    parent::__construct($connection, $parameters);
-    $this->recursiveScan = FALSE;
-  }
-
-  /**
-   * Get the pattern to sniff files for.
-   *
-   * @see IslandoraScanBatch::getPattern()
-   */
-  protected static function getPattern() {
-    return '/\.xml$/';
-  }
-
   /**
    * Get the associated object class.
    *
@@ -32,6 +12,117 @@ class BostonCollegeBatchPreprocessor extends IslandoraScanBatch {
    */
   protected static function getObjectClass() {
     return 'BostonCollegeBatchObject';
+  }
+
+  /**
+   * Refine files into a form we expect.
+   */
+  protected function groupFiles($files) {
+    $allowed_usages = array(
+      'VIEW_MAIN' => 'VIEW_MAIN',
+    );
+    // Firstly let's make a reference array.
+    $ref = array();
+    foreach ($files as $uri => $file_object) {
+      $ref[$file_object->filename] = $file_object->uri;
+    }
+    $grouped = array();
+    // Only process XML files.
+    foreach ($files as $uri => &$file_object) {
+      $extension = pathinfo($file_object->filename, PATHINFO_EXTENSION);
+      if ($extension == 'xml') {
+        $xml = simplexml_load_file($file_object->uri);
+        $xml->registerXPathNamespace('xb', 'http://com/exlibris/digitool/repository/api/xmlbeans');
+        // Only want files with descriptive metadata as our base objects.
+        $usage_xpath = $xml->xpath('/xb:digital_entity_result/xb:digital_entity/control/usage_type');
+        if ($usage_xpath) {
+          $usage = (string) reset($usage_xpath);
+          if (isset($allowed_usages[$usage])) {
+            $file_object->ext = $extension;
+            $grouped[$file_object->name][$file_object->ext] = $file_object;
+            $entity_xpath = $xml->xpath('/xb:digital_entity_result/xb:digital_entity/control/entity_type');
+            $entity_type = FALSE;
+            if ($entity_xpath) {
+              $entity_type = (string) reset($entity_xpath);
+            }
+
+            // Let's build up a nice helper array now for re-use.
+            $relations = $xml->xpath('/xb:digital_entity_result/xb:digital_entity/relations');
+            foreach ($relations as $relation) {
+              $pid_xpath = $relation->xpath('relation/pid');
+              $pid = FALSE;
+              $related_file = FALSE;
+              if ($pid_xpath) {
+                $pid = (string) reset($pid_xpath);
+              }
+              else {
+                // If this fails run away wildly.
+                drush_log(t('Unable to determine relation pid for @file, skipping.', array('@file' => $file_object->uri)));
+                break;
+              }
+              $relation_entity_xpath = $relation->xpath('relation/entity_type');
+              if ($relation_entity_xpath) {
+                $rel_entity_type = (string) reset($relation_entity_xpath);
+                // Only care about related items that are documents.
+                if ($rel_entity_type == 'DOCUMENT') {
+                  // Need to retrieve the filename from the linked xml.
+                  if (isset($ref["$pid.xml"])) {
+                    $linked_file = simplexml_load_file($ref["$pid.xml"]);
+                    $linked_file->registerXPathNamespace('xb', 'http://com/exlibris/digitool/repository/api/xmlbeans');
+                    $file_xpath = $linked_file->xpath('/xb:digital_entity_result/xb:digital_entity/stream_ref/file_name');
+                    if ($file_xpath) {
+                      $file = (string) reset($file_xpath);
+                      if (isset($ref[$file])) {
+                        $related_file = $file;
+                      }
+                      else {
+                        drush_log(t('The related file @related is not present for @file.', array(
+                          '@related' => $file,
+                          '@file' => $file_object->uri,
+                        )));
+                      }
+                    }
+                  }
+                  else {
+                    drush_log(t('Unable to find linked document for @file.', array('@file' => $file_object->uri)));
+                  }
+                }
+              }
+              if ($pid && $related_file) {
+                if (isset($ref[$related_file])) {
+                  if (!isset($file_object->linked['archive'])) {
+                    $file_object->linked['archive'] = $ref[$related_file];
+                  }
+                  else {
+                    drush_log(t('Already an archive file associated for @file..', array('@file' => $file_object->uri)));
+                  }
+                }
+              }
+              // For videos we need retrieve data from a linked file, there will
+              // only be one of these.
+              if ($entity_type == 'VIDEO_STREAM') {
+                $linked_xml = simplexml_load_file($ref["$pid.xml"]);
+                $linked_xml->registerXPathNamespace('xb', 'http://com/exlibris/digitool/repository/api/xmlbeans');
+                $vid_xpath = $linked_xml->xpath('/xb:digital_entity_result/xb:digital_entity/stream_ref[mime_type/text() = "video/mp4"]/file_name');
+                if ($vid_xpath) {
+                  $vid_file = (string) reset($vid_xpath);
+                  if (isset($ref[$vid_file])) {
+                    $file_object->linked['video'] = $ref[$vid_file];
+                  }
+                }
+                else {
+                  drush_log(t('Unable to match the linked file @linked with a scanned file for @file', array(
+                    '@linked' => $pid,
+                    '@file' => $uri,
+                  )));
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return $grouped;
   }
 }
 
@@ -51,23 +142,23 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
       static::$typeMappings = array(
         'dc' => array(
           'content_model' => 'ir:undergraduateETDCModel',
-          'collection' => 'ir:citation',
+          'collection' => 'ir:honorsThesesCollection',
           'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/DC_MODS3-4_XSLT1-0.xsl',
         ),
         'etd-ms' => array(
           'content_model' => 'ir:graduateETDCModel',
-          'collection' => 'ir:citation',
+          'collection' => 'ir:GraduateThesesCollection',
           'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
         'modstext' => array(
           'content_model' => 'ir:undergraduateETDCModel',
-          'collection' => 'ir:citation',
-          'transform' => 'MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'collection' => 'ir:honorsThesesCollection',
+          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
         'modsvideo' => array(
-          'content_model' => 'bc:VIDEO',
+          'content_model' => BOSTON_COLLEGE_VIDEO_CONTENT_MODEL,
           'collection' => 'ir:citation',
-          'transform' => 'MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
       );
     }
@@ -115,12 +206,12 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         'modstext' => array(
           'content_model' => 'ir:undergraduateETDCModel',
           'collection' => 'ir:citation',
-          'transform' => 'MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
         'modsvideo' => array(
-          'content_model' => 'bc:VIDEO',
+          'content_model' => BOSTON_COLLEGE_VIDEO_CONTENT_MODEL,
           'collection' => 'ir:citation',
-          'transform' => 'MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
       );
     }
@@ -134,11 +225,12 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     $xml->registerXPathNamespace('xb', 'http://com/exlibris/digitool/repository/api/xmlbeans');
     $this->sourceXML = $xml;
     $this->getArchivalPDF();
-
     if ($this->type == 'dc') {
       $this->getEventHistory();
     }
-
+    if ($this->type == 'etd-ms') {
+      $this->getArchivalRelease();
+    }
     if ($this->type == 'modsvideo') {
       $this->getArchivalVideo();
     }
@@ -189,10 +281,8 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
           'input' => $source,
           'xsl' => static::$typeMappings[$this->type]['transform'],
         ));
-
         $mods_doc = new DOMDocument();
         $mods_doc->loadXML($mods_xml);
-
         $mods_to_add = array();
 
         // Go get the Handle value from PREMIS if it exists and append.
@@ -227,12 +317,6 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
             'value' => $digi_pid,
           );
         }
-
-        // For videos we need to set the location.
-        if ($this->type == 'modsvideo') {
-          
-        }
-
         foreach ($mods_to_add as $values) {
           $element = $mods_doc->createElement($values['field']);
           if (isset($values['attribute'])) {
@@ -295,8 +379,30 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     }
   }
 
+  /**
+   * Creates the archival video datastream for video objects.
+   */
   protected function getArchivalVideo() {
+    if (isset($this->objectInfo['xml']->linked['video'])) {
+      $vid_datastream = $this->constructDatastream('OBJ', 'M');
+      $vid_datastream->mimetype = 'video/mp4';
+      $vid_datastream->label = basename($this->objectInfo['xml']->linked['video']);
+      $vid_datastream->setContentFromFile($this->objectInfo['xml']->linked['video']);
+      $this->ingestDatastream($vid_datastream);
+    }
+  }
 
+  /**
+   * Creates the archival datastream for release conditions on documents.
+   */
+  protected function getArchivalRelease() {
+    if (isset($this->objectInfo['xml']->linked['archive'])) {
+      $archival_datastream = $this->constructDatastream('ARCHIVE', 'M');
+      $archival_datastream->mimetype = file_get_mimetype($this->objectInfo['xml']->linked['archive']);
+      $archival_datastream->label = basename($this->objectInfo['xml']->linked['archive']);
+      $archival_datastream->setContentFromFile($this->objectInfo['xml']->linked['archive']);
+      $this->ingestDatastream($archival_datastream);
+    }
   }
 
   /**
