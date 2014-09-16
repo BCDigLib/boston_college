@@ -45,11 +45,10 @@ class BostonCollegeBatchPreprocessor extends IslandoraScanBatch {
             if ($entity_xpath) {
               $entity_type = (string) reset($entity_xpath);
             }
-
             // Let's build up a nice helper array now for re-use.
-            $relations = $xml->xpath('/xb:digital_entity_result/xb:digital_entity/relations');
+            $relations = $xml->xpath('/xb:digital_entity_result/xb:digital_entity/relations/relation');
             foreach ($relations as $relation) {
-              $pid_xpath = $relation->xpath('relation/pid');
+              $pid_xpath = $relation->xpath('pid');
               $pid = FALSE;
               $related_file = FALSE;
               if ($pid_xpath) {
@@ -60,11 +59,14 @@ class BostonCollegeBatchPreprocessor extends IslandoraScanBatch {
                 drush_log(t('Unable to determine relation pid for @file, skipping.', array('@file' => $file_object->uri)));
                 break;
               }
-              $relation_entity_xpath = $relation->xpath('relation/entity_type');
-              if ($relation_entity_xpath) {
+              $relation_entity_xpath = $relation->xpath('entity_type');
+              $relation_type_xpath = $relation->xpath('usage_type');
+              if ($relation_entity_xpath && $relation_type_xpath) {
+                $rel_usage_type = (string) reset($relation_type_xpath);
                 $rel_entity_type = (string) reset($relation_entity_xpath);
-                // Only care about related items that are documents.
-                if ($rel_entity_type == 'DOCUMENT') {
+                // Only care about related items that are documents that are
+                // archives.
+                if ($rel_entity_type == 'DOCUMENT' && $rel_usage_type == 'ARCHIVE') {
                   // Need to retrieve the filename from the linked xml.
                   if (isset($ref["$pid.xml"])) {
                     $linked_file = simplexml_load_file($ref["$pid.xml"]);
@@ -72,6 +74,9 @@ class BostonCollegeBatchPreprocessor extends IslandoraScanBatch {
                     $file_xpath = $linked_file->xpath('/xb:digital_entity_result/xb:digital_entity/stream_ref/file_name');
                     if ($file_xpath) {
                       $file = (string) reset($file_xpath);
+                      // Need to do a kind of dumb find and replace to account
+                      // for a case where there is an apostrophe in the file.
+                      $file = str_replace("'", '', $file);
                       if (isset($ref[$file])) {
                         $related_file = $file;
                       }
@@ -91,11 +96,9 @@ class BostonCollegeBatchPreprocessor extends IslandoraScanBatch {
               if ($pid && $related_file) {
                 if (isset($ref[$related_file])) {
                   if (!isset($file_object->linked['archive'])) {
-                    $file_object->linked['archive'] = $ref[$related_file];
+                    $file_object->linked['archive'] = array();
                   }
-                  else {
-                    drush_log(t('Already an archive file associated for @file..', array('@file' => $file_object->uri)));
-                  }
+                  $file_object->linked['archive'][] = $ref[$related_file];
                 }
               }
               // For videos we need retrieve data from a linked file, there will
@@ -285,26 +288,8 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         $mods_doc->loadXML($mods_xml);
         $mods_to_add = array();
 
-        // Go get the Handle value from PREMIS if it exists and append.
-        $premis_xpath = $this->sourceXML->xpath('/xb:digital_entity_result/xb:digital_entity/mds/md[type/text() = "preservation_md"]/value');
-        if ($premis_xpath) {
-          $premis = (string) reset($premis_xpath);
-          $premis_xml = simplexml_load_string($premis);
-          $premis_xml->registerXPathNamespace('premis', 'http://www.loc.gov/standards/premis');
-          $handle_result = $premis_xml->xpath('/premis:object/premis:objectIdentifier[premis:objectIdentifierType/text() = "handle"]/premis:objectIdentifierValue/text()');
-          if ($handle_result) {
-            $handle = (string) reset($handle_result);
-            $mods_to_add[] = array(
-              'field' => 'mods:identifier',
-              'attribute' => array(
-                'name' => 'type',
-                'value' => 'hdl',
-              ),
-              'value' => "http://hdl.handle.net/$handle",
-            );
-          }
-        }
-        // Finally, add the digiTool PID as an identifier.
+        $digi_pid = FALSE;
+        // Add the digiTool PID as an identifier.
         $digi_xpath = $this->sourceXML->xpath('/xb:digital_entity_result/xb:digital_entity/pid/text()');
         if ($digi_xpath) {
           $digi_pid = (string) reset($digi_xpath);
@@ -316,6 +301,41 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
             ),
             'value' => $digi_pid,
           );
+        }
+        // Go get the Handle value from PREMIS if it exists and append.
+        $premis_xpath = $this->sourceXML->xpath('/xb:digital_entity_result/xb:digital_entity/mds/md[type/text() = "preservation_md"]/value');
+        if ($premis_xpath) {
+          $premis = (string) reset($premis_xpath);
+          $premis_xml = simplexml_load_string($premis);
+          $premis_xml->registerXPathNamespace('premis', 'http://www.loc.gov/standards/premis');
+          $handle_result = $premis_xml->xpath('/premis:object/premis:objectIdentifier[premis:objectIdentifierType/text() = "handle"]/premis:objectIdentifierValue/text()');
+          if ($handle_result) {
+            $handle = (string) reset($handle_result);
+            $handle_url = "http://hdl.handle.net/$handle";
+            $mods_to_add[] = array(
+              'field' => 'mods:identifier',
+              'attribute' => array(
+                'name' => 'type',
+                'value' => 'hdl',
+              ),
+              'value' => $handle_url,
+            );
+            // Go out and resolve the old URL for safety's sake.
+            $request = drupal_http_request($handle_url);
+            $old_url = FALSE;
+            if (isset($request->redirect_url)) {
+              $old_url = $request->redirect_url;
+            }
+            // Add the Handle to be updated at a later time.
+            db_insert('boston_college_handles')
+              ->fields(array(
+                'handle' => $handle,
+                'islandora_pid' => $this->id,
+                'digitool_pid' => $digi_pid ? $digi_pid : NULL,
+                'old_url' => $old_url ? $old_url : NULL,
+              ))
+              ->execute();
+          }
         }
         foreach ($mods_to_add as $values) {
           $element = $mods_doc->createElement($values['field']);
@@ -397,11 +417,23 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
    */
   protected function getArchivalRelease() {
     if (isset($this->objectInfo['xml']->linked['archive'])) {
-      $archival_datastream = $this->constructDatastream('ARCHIVE', 'M');
-      $archival_datastream->mimetype = file_get_mimetype($this->objectInfo['xml']->linked['archive']);
-      $archival_datastream->label = basename($this->objectInfo['xml']->linked['archive']);
-      $archival_datastream->setContentFromFile($this->objectInfo['xml']->linked['archive']);
-      $this->ingestDatastream($archival_datastream);
+      $first = TRUE;
+      $count = 1;
+      foreach ($this->objectInfo['xml']->linked['archive'] as $archive) {
+        if ($first) {
+          $ds_name = "ARCHIVE";
+          $first = FALSE;
+        }
+        else {
+          $count++;
+          $ds_name = "ARCHIVE_$count";
+        }
+        $archival_datastream = $this->constructDatastream($ds_name, 'M');
+        $archival_datastream->mimetype = file_get_mimetype($archive);
+        $archival_datastream->label = basename($archive);
+        $archival_datastream->setContentFromFile($archive);
+        $this->ingestDatastream($archival_datastream);
+      }
     }
   }
 
@@ -435,5 +467,4 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
   public function getResources() {
     return array();
   }
-
 }

@@ -27,3 +27,41 @@ function boston_college_uninstall() {
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   islandora_install_solution_pack('boston_college', 'uninstall');
 }
+
+/**
+ * Implements hook_schema().
+ */
+function boston_college_schema() {
+  $schema['boston_college_handles'] = array(
+    'fields' => array(
+      'handle' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+      ),
+      'islandora_pid' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+      ),
+      'digitool_pid' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+      ),
+      'old_url' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+      ),
+      'updated' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('handle'),
+  );
+  return $schema;
+}
