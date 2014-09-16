@@ -21,16 +21,12 @@
  * @see hook_islandora_derivative()
  */
 function boston_college_update_object_label_from_mods_derivative(AbstractObject $object, $force = FALSE) {
-  // XXX: This is a pretty bad hack to get around a low level Tuque 409 problem.
-  $pid = $object->id;
-  $tuque = islandora_get_tuque_connection();
-  $tuque->cache->delete($pid);
-  $non_cached_object = islandora_object_load($pid);
-  $mods_xml = new SimpleXMLElement($non_cached_object['MODS']->content);
+  $mods_xml = new SimpleXMLElement($object['MODS']->content);
+  $mods_xml->registerXPathNamespace('mods', 'http://www.loc.gov/mods/v3');
   $title = $mods_xml->xpath('/mods:mods/mods:titleInfo/mods:title');
   $title = reset($title);
-  if ($title && $non_cached_object->label != $title) {
-    $non_cached_object->label = $title;
+  if ($title && $object->label != $title) {
+    $object->label = $title;
   }
   return array(
     'success' => TRUE,
@@ -38,7 +34,7 @@ function boston_college_update_object_label_from_mods_derivative(AbstractObject 
       array(
         'message' => t('Updated the label for @pid.'),
         'message_sub' => array(
-          '@pid' => $pid,
+          '@pid' => $object->id,
         ),
         'type' => 'dsm',
       ),
