@@ -249,7 +249,7 @@ function boston_college_islandora_BCVideo_islandora_ingest_steps() {
 }
 
 /**
- * Implements hook_islandora_CMODEL_PID_derivative().
+ * Implements hook_CMODEL_PID_derivative().
  */
 function boston_college_islandora_BCVideo_islandora_derivative() {
   return array(
@@ -282,6 +282,25 @@ function boston_college_islandora_view_object(AbstractObject $object) {
     module_load_include('inc', 'islandora_scholar', 'includes/utilities');
     return islandora_scholar_get_view($object);
   }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function boston_college_theme($existing, $type, $theme, $path) {
+  return array(
+    'boston_college_video' => array(
+      'variables' => array('object' => NULL),
+      'file' => 'theme/theme.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_CMODEL_PID_islandora_view_object().
+ */
+function boston_college_islandora_BCVideo_islandora_view_object(AbstractObject $object) {
+  return array(theme('boston_college_video', array('object' => $object)));
 }
 
 /**
