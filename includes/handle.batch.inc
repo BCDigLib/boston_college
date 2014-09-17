@@ -7,10 +7,12 @@
 /**
  * Constructs and performs the citation batch operation.
  *
+ * @param string $base_url
+ *   The base url to be used when constructing Handle URLs.
  * @param array $context
  *   The context of the Drupal batch.
  */
-function boston_college_update_handles_batch_operation(&$context) {
+function boston_college_update_handles_batch_operation($base_url, &$context) {
   module_load_include('inc', 'islandora_handle', 'includes/handle');
   $handle_update = 10;
   $result = db_query('SELECT COUNT(*) FROM {boston_college_handles} WHERE updated = :updated', array(':updated' => 0));
@@ -34,9 +36,10 @@ function boston_college_update_handles_batch_operation(&$context) {
     ->execute();
   foreach ($op_results as $result) {
     $handle = $result->handle;
-    $target = url("islandora/object/{$result->pid}", array(
+    $target = url("islandora/object/{$result->islandora_pid}", array(
       'language' => (object) array('language' => FALSE),
       'absolute' => TRUE,
+      'base_url' => $base_url,
     ));
     $response = islandora_handle_update_handle_url($handle, $target);
     if ($response->code == 201 || $response->code == 204) {

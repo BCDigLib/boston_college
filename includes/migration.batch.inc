@@ -227,15 +227,15 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     $xml = simplexml_load_file($this->objectInfo['xml']->uri);
     $xml->registerXPathNamespace('xb', 'http://com/exlibris/digitool/repository/api/xmlbeans');
     $this->sourceXML = $xml;
-    $this->getArchivalPDF();
+    $this->addArchivalPDF();
     if ($this->type == 'dc') {
-      $this->getEventHistory();
+      $this->addEventHistory();
     }
     if ($this->type == 'etd-ms') {
-      $this->getArchivalRelease();
+      $this->addArchivalRelease();
     }
     if ($this->type == 'modsvideo') {
-      $this->getArchivalVideo();
+      $this->addArchivalVideo();
     }
     return parent::batchProcess();
   }
@@ -368,7 +368,7 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
   /**
    * Gets the archival PDF to be added.
    */
-  protected function getArchivalPDF() {
+  protected function addArchivalPDF() {
     if ($this->pdfURI) {
       $pdf_datastream = $this->constructDatastream(BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID, 'M');
       $pdf_datastream->mimetype = 'application/pdf';
@@ -381,7 +381,7 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
   /**
    * Creates the event history datastream for graduate objects.
    */
-  protected function getEventHistory() {
+  protected function addEventHistory() {
     $event_xpath = $this->sourceXML->xpath('/xb:digital_entity_result/xb:digital_entity/mds/md[type/text() = "changehistory_md"]/value');
     if ($event_xpath) {
       $history = (string) reset($event_xpath);
@@ -402,7 +402,7 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
   /**
    * Creates the archival video datastream for video objects.
    */
-  protected function getArchivalVideo() {
+  protected function addArchivalVideo() {
     if (isset($this->objectInfo['xml']->linked['video'])) {
       $vid_datastream = $this->constructDatastream('OBJ', 'M');
       $vid_datastream->mimetype = 'video/mp4';
@@ -415,7 +415,7 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
   /**
    * Creates the archival datastream for release conditions on documents.
    */
-  protected function getArchivalRelease() {
+  protected function addArchivalRelease() {
     if (isset($this->objectInfo['xml']->linked['archive'])) {
       $first = TRUE;
       $count = 1;

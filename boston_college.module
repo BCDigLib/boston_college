@@ -249,7 +249,7 @@ function boston_college_islandora_BCVideo_islandora_ingest_steps() {
 }
 
 /**
- * Implements hook_CMODEL_PID_derivative().
+ * Implements hook_islandora_CMODEL_PID_islandora_derivative().
  */
 function boston_college_islandora_BCVideo_islandora_derivative() {
   return array(
@@ -275,16 +275,6 @@ function boston_college_islandora_BCVideo_islandora_derivative() {
 }
 
 /**
- * Implements hook_islandora_view_object().
- */
-function boston_college_islandora_view_object(AbstractObject $object) {
-  if (array_intersect(array('ir:undergraduateETDCModel', 'ir:graduateETDCModel'), $object->models)) {
-    module_load_include('inc', 'islandora_scholar', 'includes/utilities');
-    return islandora_scholar_get_view($object);
-  }
-}
-
-/**
  * Implements hook_theme().
  */
 function boston_college_theme($existing, $type, $theme, $path) {
@@ -304,40 +294,11 @@ function boston_college_islandora_BCVideo_islandora_view_object(AbstractObject $
 }
 
 /**
- * Adds a table to track Handles that need to be modified during the migration.
+ * Implements hook_islandora_view_object().
  */
-function boston_college_update_7000() {
-  $schema['boston_college_handles'] = array(
-    'fields' => array(
-      'handle' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-      ),
-      'islandora_pid' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-      ),
-      'digitool_pid' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => FALSE,
-      ),
-      'old_url' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => FALSE,
-      ),
-      'updated' => array(
-        'type' => 'int',
-        'size' => 'tiny',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-    ),
-    'primary key' => array('handle'),
-  );
-  db_create_table('boston_college_handles', $schema['boston_college_handles']);
-  return t('Created table to track Handles.');
+function boston_college_islandora_view_object(AbstractObject $object) {
+  if (array_intersect(array('ir:undergraduateETDCModel', 'ir:graduateETDCModel'), $object->models)) {
+    module_load_include('inc', 'islandora_scholar', 'includes/utilities');
+    return islandora_scholar_get_view($object);
+  }
 }
