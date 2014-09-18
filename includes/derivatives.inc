@@ -48,7 +48,7 @@ function boston_college_update_object_label_from_mods_derivative(AbstractObject 
  * @see hook_islandora_derivative()
  */
 function boston_college_create_stream(AbstractObject $object, $force = FALSE) {
-  if (($force || !isset($object['STREAM'])) && isset($object['MODS'])) {
+  if (isset($object['MODS'])) {
     $mods_xml = new SimpleXMLElement($object['MODS']->content);
     $streams = $mods_xml->xpath('/mods:mods/mods:location/mods:url');
     $stream = (string) reset($streams);
