@@ -14,26 +14,24 @@
  */
 function boston_college_update_handles_batch_operation($base_url, &$context) {
   module_load_include('inc', 'islandora_handle', 'includes/handle');
-  $handle_update = 10;
-  $result = db_query('SELECT COUNT(*) FROM {boston_college_handles} WHERE updated = :updated', array(':updated' => 0));
-  $total_results = $result->fetchField();
+
   $sandbox = &$context['sandbox'];
-  if (!isset($sandbox['offset'])) {
-    $sandbox['offset'] = 0;
-    $sandbox['total'] = $total_results;
-    if ($sandbox['total'] == 0) {
-      return;
-    }
+  if (!isset($sandbox['last_pid'])) {
+    $last_pid = FALSE;
   }
-  $context['message'] = t('Processing results @start to @end.', array(
-    '@start' => $sandbox['offset'],
-    '@end' => min($sandbox['offset'] + $handle_update, $sandbox['total']),
-  ));
+  else {
+    $last_pid = $sandbox['last_pid'];
+  }
+  $context['message'] = t('Processing results...');
   $op_results = db_select('boston_college_handles', 'u')
     ->fields('u', array('handle', 'islandora_pid'))
     ->condition('updated', 0, '=')
-    ->range($sandbox['offset'], $handle_update)
-    ->execute();
+    ->range(0, 10)
+    ->orderBy('islandora_pid');
+  if ($last_pid) {
+    $op_results->condition('islandora_pid', $last_pid, '>');
+  }
+  $op_results = $op_results->execute();
   foreach ($op_results as $result) {
     $handle = $result->handle;
     $target = url("islandora/object/{$result->islandora_pid}", array(
@@ -80,7 +78,8 @@ function boston_college_update_handles_batch_operation($base_url, &$context) {
         ),
         'error'));
     }
+    $last_pid = $result->islandora_pid;
   }
-  $sandbox['offset'] += $handle_update;
-  $context['finished'] = $sandbox['offset'] / $sandbox['total'];
+  $sandbox['last_pid'] = $last_pid;
+  $context['finished'] = $op_results->rowCount() ? 0 : 1;
 }
