@@ -24,7 +24,7 @@
         <form MIME="image/jpeg"></form>
     </dsTypeModel>
     <dsTypeModel ID="ARCHIVE" optional="false">
-        <form MIME="text/xml"></form>
+        <form MIME="application/xml"></form>
     </dsTypeModel>
     <dsTypeModel ID="SUPPLEMENTAL" optional="true"></dsTypeModel>
 </dsCompositeModel>
