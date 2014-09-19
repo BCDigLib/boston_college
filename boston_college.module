@@ -8,6 +8,8 @@
 define('BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID', 'ARCHIVE-PDF');
 define('BOSTON_COLLEGE_VIDEO_CONTENT_MODEL', 'islandora:BCVideo');
 define('BOSTON_COLLEGE_VIDEO_FORM', 'BC Video MODS Form');
+define('BOSTON_COLLEGE_GRADUATE_THESIS_CONTENT_MODEL', 'ir:graduateETDCModel');
+define('BOSTON_COLLEGE_UNDERGRADUATE_THESIS_CONTENT_MODEL', 'ir:undergraduateETDCModel');
 
 /**
  * Implements hook_menu_alter().
@@ -184,6 +186,8 @@ function boston_college_menu() {
  */
 function boston_college_islandora_required_objects(IslandoraTuque $connection) {
   $module_path = drupal_get_path('module', 'boston_college');
+  $islandora_path = drupal_get_path('module', 'islandora');
+
   // Video Content Model.
   $video_content_model = $connection->repository->constructObject(BOSTON_COLLEGE_VIDEO_CONTENT_MODEL);
   $video_content_model->owner = 'fedoraAdmin';
@@ -196,11 +200,83 @@ function boston_college_islandora_required_objects(IslandoraTuque $connection) {
   $datastream->setContentFromFile("$module_path/xml/boston_college_video_ds_composite.xml", FALSE);
   $video_content_model->ingestDatastream($datastream);
 
+  // Graduate Thesis Content Model.
+  $graduate_thesis_content_model = $connection->repository->constructObject(BOSTON_COLLEGE_GRADUATE_THESIS_CONTENT_MODEL);
+  $graduate_thesis_content_model->owner = 'fedoraAdmin';
+  $graduate_thesis_content_model->label = 'BC Graduate Thesis Content Model';
+  $graduate_thesis_content_model->models = 'fedora-system:ContentModel-3.0';
+
+  // DS-COMPOSITE-MODEL Datastream.
+  $datastream = $graduate_thesis_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'X');
+  $datastream->label = 'DS-COMPOSITE-MODEL';
+  $datastream->mimetype = 'application/xml';
+  $datastream->setContentFromFile("$module_path/xml/boston_college_graduate_thesis_ds_composite.xml", FALSE);
+  $graduate_thesis_content_model->ingestDatastream($datastream);
+
+  // Graduate Theses Collection.
+  $graduate_collection = $connection->repository->constructObject('ir:GraduateThesesCollection');
+  $graduate_collection->owner = 'fedoraAdmin';
+  $graduate_collection->label = 'Graduate ETDs';
+  $graduate_collection->models = 'islandora:collectionCModel';
+  $graduate_collection->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:bc-root');
+
+  // Collection Policy Datastream.
+  $datastream = $graduate_collection->constructDatastream('COLLECTION_POLICY', 'M');
+  $datastream->label = 'Collection policy';
+  $datastream->mimetype = 'application/xml';
+  $datastream->setContentFromFile("$module_path/xml/boston_college_graduate_thesis_collection_policy.xml", FALSE);
+  $graduate_collection->ingestDatastream($datastream);
+
+  // TN Datastream.
+  $datastream = $graduate_collection->constructDatastream('TN', 'M');
+  $datastream->label = 'Thumbnail';
+  $datastream->mimetype = 'image/png';
+  $datastream->setContentFromFile("$islandora_path/images/folder.png", FALSE);
+  $graduate_collection->ingestDatastream($datastream);
+
+  // Undergraduate Thesis Content Model.
+  $undergraduate_thesis_content_model = $connection->repository->constructObject(BOSTON_COLLEGE_UNDERGRADUATE_THESIS_CONTENT_MODEL);
+  $undergraduate_thesis_content_model->owner = 'fedoraAdmin';
+  $undergraduate_thesis_content_model->label = 'BC Undergraduate Honors Thesis Content Model';
+  $undergraduate_thesis_content_model->models = 'fedora-system:ContentModel-3.0';
+
+  // DS-COMPOSITE-MODEL Datastream.
+  $datastream = $undergraduate_thesis_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'X');
+  $datastream->label = 'DS-COMPOSITE-MODEL';
+  $datastream->mimetype = 'application/xml';
+  $datastream->setContentFromFile("$module_path/xml/boston_college_undergraduate_thesis_ds_composite.xml", FALSE);
+  $undergraduate_thesis_content_model->ingestDatastream($datastream);
+
+  // Undergraduate Honors Theses Collection.
+  $undergraduate_collection = $connection->repository->constructObject('ir:honorsThesesCollection');
+  $undergraduate_collection->owner = 'fedoraAdmin';
+  $undergraduate_collection->label = 'Undergraduate Honors Theses';
+  $undergraduate_collection->models = 'islandora:collectionCModel';
+  $undergraduate_collection->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:bc-root');
+
+  // Collection Policy Datastream.
+  $datastream = $undergraduate_collection->constructDatastream('COLLECTION_POLICY', 'M');
+  $datastream->label = 'Collection policy';
+  $datastream->mimetype = 'application/xml';
+  $datastream->setContentFromFile("$module_path/xml/boston_college_graduate_thesis_collection_policy.xml", FALSE);
+  $undergraduate_collection->ingestDatastream($datastream);
+
+  // TN Datastream.
+  $datastream = $undergraduate_collection->constructDatastream('TN', 'M');
+  $datastream->label = 'Thumbnail';
+  $datastream->mimetype = 'image/png';
+  $datastream->setContentFromFile("$islandora_path/images/folder.png", FALSE);
+  $undergraduate_collection->ingestDatastream($datastream);
+
   return array(
     'boston_college' => array(
       'title' => 'Boston College',
       'objects' => array(
         $video_content_model,
+        $graduate_thesis_content_model,
+        $graduate_collection,
+        $undergraduate_thesis_content_model,
+        $undergraduate_collection,
       ),
     ),
   );
