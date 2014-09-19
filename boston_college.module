@@ -231,7 +231,7 @@ function boston_college_islandora_required_objects(IslandoraTuque $connection) {
   $graduate_collection->ingestDatastream($datastream);
 
   // Undergraduate Thesis Content Model.
-  $undergraduate_thesis_content_model = $connection->repository->constructObject(BOSTON_COLLEGE_GRADUATE_THESIS_CONTENT_MODEL);
+  $undergraduate_thesis_content_model = $connection->repository->constructObject(BOSTON_COLLEGE_UNDERGRADUATE_THESIS_CONTENT_MODEL);
   $undergraduate_thesis_content_model->owner = 'fedoraAdmin';
   $undergraduate_thesis_content_model->label = 'BC Undergraduate Honors Thesis Content Model';
   $undergraduate_thesis_content_model->models = 'fedora-system:ContentModel-3.0';

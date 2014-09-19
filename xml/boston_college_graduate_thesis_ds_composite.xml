@@ -26,7 +26,7 @@
     <dsTypeModel ID="PREVIEW" optional="false">
         <form MIME="image/jpeg"></form>
     </dsTypeModel>
-    <dsTypeModel ID="SUPPLEMENTAL" optional="true"></dsTypeModel>
+    <dsTypeModel ID="SUPPLEMENTAL" optional="true"/>
     <dsTypeModel ID="ARCHIVE" optional="false">
         <form MIME="text/plain"></form>
         <form MIME="application/pdf"></form>
