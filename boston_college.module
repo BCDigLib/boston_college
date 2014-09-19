@@ -217,9 +217,9 @@ function boston_college_islandora_required_objects(IslandoraTuque $connection) {
   $graduate_collection->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:bc-root');
 
   // Collection Policy Datastream.
-  $datastream = $graduate_collection->constructDatastream('COLLECTION_POLICY', 'X');
+  $datastream = $graduate_collection->constructDatastream('COLLECTION_POLICY', 'M');
   $datastream->label = 'Collection policy';
-  $datastream->mimetype = 'text/xml';
+  $datastream->mimetype = 'application/xml';
   $datastream->setContentFromFile("$module_path/xml/boston_college_graduate_thesis_collection_policy.xml", FALSE);
   $graduate_collection->ingestDatastream($datastream);
 
@@ -251,9 +251,9 @@ function boston_college_islandora_required_objects(IslandoraTuque $connection) {
   $undergraduate_collection->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:bc-root');
 
   // Collection Policy Datastream.
-  $datastream = $undergraduate_collection->constructDatastream('COLLECTION_POLICY', 'X');
+  $datastream = $undergraduate_collection->constructDatastream('COLLECTION_POLICY', 'M');
   $datastream->label = 'Collection policy';
-  $datastream->mimetype = 'text/xml';
+  $datastream->mimetype = 'application/xml';
   $datastream->setContentFromFile("$module_path/xml/boston_college_graduate_thesis_collection_policy.xml", FALSE);
   $undergraduate_collection->ingestDatastream($datastream);
 
