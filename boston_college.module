@@ -100,6 +100,7 @@ function boston_college_islandora_derivative(AbstractObject $object = NULL) {
 
   $models = boston_college_citation_models();
   if (array_intersect($models, $object->models)) {
+    module_load_include('inc', 'islandora_scholar', 'includes/utilities');
     $derivatives[] = array(
       'source_dsid' => BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID,
       'destination_dsid' => 'PDF',
@@ -108,6 +109,7 @@ function boston_college_islandora_derivative(AbstractObject $object = NULL) {
       ),
       'file' => "$mod_path/includes/splash.inc",
     );
+    $derivatives = array_merge($derivatives, islandora_scholar_get_derivatives());
   }
 
   return $derivatives;
@@ -123,6 +125,8 @@ function boston_college_citation_models() {
   return array(
     'ir:citationCModel',
     'ir:thesisCModel',
+    'ir:undergraduateETDCModel',
+    'ir:graduateETDCModel',
   );
 }
 
@@ -245,7 +249,7 @@ function boston_college_islandora_BCVideo_islandora_ingest_steps() {
 }
 
 /**
- * Implements hook_CMODEL_PID_derivative().
+ * Implements hook_islandora_CMODEL_PID_islandora_derivative().
  */
 function boston_college_islandora_BCVideo_islandora_derivative() {
   return array(
@@ -287,4 +291,14 @@ function boston_college_theme($existing, $type, $theme, $path) {
  */
 function boston_college_islandora_BCVideo_islandora_view_object(AbstractObject $object) {
   return array(theme('boston_college_video', array('object' => $object)));
+}
+
+/**
+ * Implements hook_islandora_view_object().
+ */
+function boston_college_islandora_view_object(AbstractObject $object) {
+  if (array_intersect(array('ir:undergraduateETDCModel', 'ir:graduateETDCModel'), $object->models)) {
+    module_load_include('inc', 'islandora_scholar', 'includes/utilities');
+    return islandora_scholar_get_view($object);
+  }
 }
