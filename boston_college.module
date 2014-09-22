@@ -296,27 +296,6 @@ function boston_college_islandora_required_objects(IslandoraTuque $connection) {
   $datastream->setContentFromFile("$module_path/xml/boston_college_thesis_ds_composite.xml", FALSE);
   $thesis_content_model->ingestDatastream($datastream);
 
-  // General Citation Collection.
-  $citation_collection = $connection->repository->constructObject('bc:citationCollection');
-  $citation_collection->owner = 'fedoraAdmin';
-  $citation_collection->label = 'Citations';
-  $citation_collection->models = 'islandora:collectionCModel';
-  $citation_collection->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:bc-root');
-
-  // Collection Policy Datastream.
-  $datastream = $citation_collection->constructDatastream('COLLECTION_POLICY', 'M');
-  $datastream->label = 'Collection policy';
-  $datastream->mimetype = 'application/xml';
-  $datastream->setContentFromFile("$module_path/xml/boston_college_citation_collection_policy.xml", FALSE);
-  $citation_collection->ingestDatastream($datastream);
-
-  // TN Datastream.
-  $datastream = $citation_collection->constructDatastream('TN', 'M');
-  $datastream->label = 'Thumbnail';
-  $datastream->mimetype = 'image/png';
-  $datastream->setContentFromFile("$islandora_path/images/folder.png", FALSE);
-  $citation_collection->ingestDatastream($datastream);
-
   return array(
     'boston_college' => array(
       'title' => 'Boston College',
@@ -328,7 +307,6 @@ function boston_college_islandora_required_objects(IslandoraTuque $connection) {
         $undergraduate_collection,
         $citation_content_model,
         $thesis_content_model,
-        $citation_collection,
       ),
     ),
   );
