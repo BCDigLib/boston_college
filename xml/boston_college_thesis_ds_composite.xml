@@ -17,16 +17,16 @@
     <dsTypeModel ID="PDF" optional="true">
         <form MIME="application/pdf"></form>
     </dsTypeModel>
-    <dsTypeModel ID="FULL_TEXT" optional="false">
+    <dsTypeModel ID="FULL_TEXT" optional="true">
         <form MIME="text/plain"></form>
     </dsTypeModel>
-    <dsTypeModel ID="TN" optional="false">
+    <dsTypeModel ID="TN" optional="true">
         <form MIME="image/jpeg"></form>
     </dsTypeModel>
-    <dsTypeModel ID="PREVIEW" optional="false">
+    <dsTypeModel ID="PREVIEW" optional="true">
         <form MIME="image/jpeg"></form>
     </dsTypeModel>
-    <dsTypeModel ID="ARCHIVE" optional="false">
+    <dsTypeModel ID="ARCHIVE" optional="true">
         <form MIME="application/xml"></form>
     </dsTypeModel>
     <dsTypeModel ID="SUPPLEMENTAL" optional="true"></dsTypeModel>

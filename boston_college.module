@@ -10,6 +10,8 @@ define('BOSTON_COLLEGE_VIDEO_CONTENT_MODEL', 'islandora:BCVideo');
 define('BOSTON_COLLEGE_VIDEO_FORM', 'BC Video MODS Form');
 define('BOSTON_COLLEGE_GRADUATE_THESIS_CONTENT_MODEL', 'ir:graduateETDCModel');
 define('BOSTON_COLLEGE_UNDERGRADUATE_THESIS_CONTENT_MODEL', 'ir:undergraduateETDCModel');
+define('BOSTON_COLLEGE_CITATION_CONTENT_MODEL', 'bc:citationCModel');
+define('BOSTON_COLLEGE_THESIS_CONTENT_MODEL', 'bc:thesisCModel');
 
 /**
  * Implements hook_menu_alter().
@@ -125,10 +127,10 @@ function boston_college_islandora_derivative(AbstractObject $object = NULL) {
  */
 function boston_college_citation_models() {
   return array(
-    'ir:citationCModel',
-    'ir:thesisCModel',
-    'ir:undergraduateETDCModel',
-    'ir:graduateETDCModel',
+    BOSTON_COLLEGE_GRADUATE_THESIS_CONTENT_MODEL,
+    BOSTON_COLLEGE_UNDERGRADUATE_THESIS_CONTENT_MODEL,
+    BOSTON_COLLEGE_CITATION_CONTENT_MODEL,
+    BOSTON_COLLEGE_THESIS_CONTENT_MODEL,
   );
 }
 
@@ -268,6 +270,32 @@ function boston_college_islandora_required_objects(IslandoraTuque $connection) {
   $datastream->setContentFromFile("$islandora_path/images/folder.png", FALSE);
   $undergraduate_collection->ingestDatastream($datastream);
 
+  // Citation Content Model.
+  $citation_content_model = $connection->repository->constructObject(BOSTON_COLLEGE_CITATION_CONTENT_MODEL);
+  $citation_content_model->owner = 'fedoraAdmin';
+  $citation_content_model->label = 'BC Citation Content Model';
+  $citation_content_model->models = 'fedora-system:ContentModel-3.0';
+
+  // DS-COMPOSITE-MODEL Datastream.
+  $datastream = $citation_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'X');
+  $datastream->label = 'DS-COMPOSITE-MODEL';
+  $datastream->mimetype = 'application/xml';
+  $datastream->setContentFromFile("$module_path/xml/boston_college_citation_ds_composite.xml", FALSE);
+  $citation_content_model->ingestDatastream($datastream);
+
+  // Thesis Content Model.
+  $thesis_content_model = $connection->repository->constructObject(BOSTON_COLLEGE_THESIS_CONTENT_MODEL);
+  $thesis_content_model->owner = 'fedoraAdmin';
+  $thesis_content_model->label = 'BC Thesis Content Model';
+  $thesis_content_model->models = 'fedora-system:ContentModel-3.0';
+
+  // DS-COMPOSITE-MODEL Datastream.
+  $datastream = $thesis_content_model->constructDatastream('DS-COMPOSITE-MODEL', 'X');
+  $datastream->label = 'DS-COMPOSITE-MODEL';
+  $datastream->mimetype = 'application/xml';
+  $datastream->setContentFromFile("$module_path/xml/boston_college_thesis_ds_composite.xml", FALSE);
+  $thesis_content_model->ingestDatastream($datastream);
+
   return array(
     'boston_college' => array(
       'title' => 'Boston College',
@@ -277,6 +305,8 @@ function boston_college_islandora_required_objects(IslandoraTuque $connection) {
         $graduate_collection,
         $undergraduate_thesis_content_model,
         $undergraduate_collection,
+        $citation_content_model,
+        $thesis_content_model,
       ),
     ),
   );
@@ -373,7 +403,7 @@ function boston_college_islandora_BCVideo_islandora_view_object(AbstractObject $
  * Implements hook_islandora_view_object().
  */
 function boston_college_islandora_view_object(AbstractObject $object) {
-  if (array_intersect(array('ir:undergraduateETDCModel', 'ir:graduateETDCModel'), $object->models)) {
+  if (array_intersect(boston_college_citation_models(), $object->models)) {
     module_load_include('inc', 'islandora_scholar', 'includes/utilities');
     return islandora_scholar_get_view($object);
   }
