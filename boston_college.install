@@ -99,7 +99,7 @@ function boston_college_update_7000() {
         'default' => 0,
       ),
     ),
-    'primary key' => array('handle'),
+    'primary key' => array('islandora_pid'),
   );
   db_create_table('boston_college_handles', $schema['boston_college_handles']);
   return t('Created table to track Handles.');
