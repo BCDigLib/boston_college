@@ -172,6 +172,7 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     if ($type) {
       if (isset(static::$typeMappings[$type])) {
         $this->preprocessorParameters['content_models'] = array(static::$typeMappings[$type]['content_model']);
+        $this->preprocessorParameters['parent'] = static::$typeMappings[$type]['collection'];
       }
     }
     else {
