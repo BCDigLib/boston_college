@@ -119,6 +119,18 @@ class BostonCollegeBatchPreprocessor extends IslandoraScanBatch {
                     '@file' => $uri,
                   )));
                 }
+
+                // Boston College has inconsistent streaming URL placement, thus
+                // need to account for the case where it won't be present in the
+                // MODS by default.
+                $streaming_url_xpath = $xml->xpath('/xb:digital_entity_result/xb:digital_entity/stream_ref/directory_path');
+                if ($streaming_url_xpath) {
+                  $streaming_url = (string) reset($streaming_url_xpath);
+                  $file_object->streaming_url = $streaming_url;
+                }
+                else {
+                  drush_log(t('Unable to find a streaming URL on @file.', array('@file' => $uri)));
+                }
               }
             }
           }
@@ -336,6 +348,19 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
                 'old_url' => $old_url ? $old_url : NULL,
               ))
               ->execute();
+          }
+        }
+        if (isset($this->objectInfo['xml']->streaming_url)) {
+          $mods_xpath = simplexml_load_string($mods_xml);
+          $mods_xpath->registerXPathNamespace('mods', 'http://www.loc.gov/mods/v3');
+          $location_xpath = $mods_xpath->xpath('mods:mods/mods:location/mods:url');
+          if (!$location_xpath) {
+            $url_element = $mods_doc->createElement('mods:url');
+            $location_element = $mods_doc->createElement('mods:location');
+            $text_node = $mods_doc->createTextNode($this->objectInfo['xml']->streaming_url);
+            $location_element->appendChild($text_node);
+            $url_element->appendChild($location_element);
+            $mods_doc->documentElement->appendChild($url_element);
           }
         }
         foreach ($mods_to_add as $values) {
