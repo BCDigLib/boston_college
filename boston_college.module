@@ -22,6 +22,7 @@ function boston_college_menu_alter(&$items) {
     'file path' => drupal_get_path('module', 'boston_college'),
     'file' => 'includes/document.tab.inc',
     'page callback' => 'boston_college_document_view',
+    'access callback' => 'boston_college_upload_access',
   ) + $items['islandora/object/%islandora_object/islandora_scholar_upload'];
 }
 
@@ -407,4 +408,15 @@ function boston_college_islandora_view_object(AbstractObject $object) {
     module_load_include('inc', 'islandora_scholar', 'includes/utilities');
     return islandora_scholar_get_view($object);
   }
+}
+
+/**
+ * Access callback for upload tab.
+ *
+ * Allow if the user's allowed to add datastreams or is the object's owner.
+ */
+function boston_college_upload_access($object) {
+  $allowed_models = boston_college_citation_models();
+  return is_object($object) && count(array_intersect($allowed_models, $object->models)) > 0 &&
+    islandora_object_access(ISLANDORA_ADD_DS, $object);
 }
