@@ -358,9 +358,9 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
             $url_element = $mods_doc->createElement('mods:url');
             $location_element = $mods_doc->createElement('mods:location');
             $text_node = $mods_doc->createTextNode($this->objectInfo['xml']->streaming_url);
-            $location_element->appendChild($text_node);
-            $url_element->appendChild($location_element);
-            $mods_doc->documentElement->appendChild($url_element);
+            $url_element->appendChild($text_node);
+            $location_element->appendChild($url_element);
+            $mods_doc->documentElement->appendChild($location_element);
           }
         }
         foreach ($mods_to_add as $values) {
