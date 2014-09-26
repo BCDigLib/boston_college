@@ -35,6 +35,7 @@ function boston_college_video_upload_form(array $form, array &$form_state) {
     ),
   );
 }
+
 /**
  * Submit handler, adds uploaded file to the video object.
  *
@@ -47,5 +48,7 @@ function boston_college_video_upload_form(array $form, array &$form_state) {
  */
 function boston_college_video_upload_form_submit(array $form, array &$form_state) {
   form_load_include($form_state, 'inc', 'islandora_video', 'includes/video_upload.form');
-  return islandora_video_upload_form_submit($form, $form_state);
+  if ($form_state['values']['file']) {
+    return islandora_video_upload_form_submit($form, $form_state);
+  }
 }
