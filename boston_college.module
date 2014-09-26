@@ -328,7 +328,7 @@ function boston_college_islandora_xml_form_builder_forms() {
  * Implements hook_islandora_xml_form_builder_form_associations().
  */
 function boston_college_islandora_xml_form_builder_form_associations() {
-  return array(
+  $associations = array(
     'boston_college_video_mods_form' => array(
       'content_model' => BOSTON_COLLEGE_VIDEO_CONTENT_MODEL,
       'form_name' => BOSTON_COLLEGE_VIDEO_FORM,
@@ -338,6 +338,20 @@ function boston_college_islandora_xml_form_builder_form_associations() {
       'template' => FALSE,
     ),
   );
+
+  $citation_models = boston_college_citation_models();
+  foreach ($citation_models as $model) {
+    $associations[] = array(
+      'content_model' => $model,
+      'form_name' => 'Citation MODS form',
+      'dsid' => 'MODS',
+      'title_field' => array('titleInfo', 'title'),
+      'transform' => 'mods_to_dc.xsl',
+      'template' => FALSE,
+    );
+  }
+
+  return $associations;
 }
 
 /**
