@@ -115,6 +115,11 @@ function boston_college_islandora_derivative(AbstractObject $object = NULL) {
       'file' => "$mod_path/includes/splash.inc",
     );
     $derivatives = array_merge($derivatives, islandora_scholar_get_derivatives());
+    foreach ($derivatives as &$derivative) {
+      if ($derivative['source_dsid'] == 'PDF') {
+        $derivative['source_dsid'] = BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID;
+      }
+    }
   }
 
   return $derivatives;
