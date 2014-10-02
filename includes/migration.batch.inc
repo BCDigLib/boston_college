@@ -166,8 +166,8 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
           'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
         'modstext' => array(
-          'content_model' => 'ir:undergraduateETDCModel',
-          'collection' => 'ir:honorsThesesCollection',
+          'content_model' => 'bc:citationCModel',
+          'collection' => 'ir:citationCollection',
           'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
         'modsvideo' => array(
@@ -185,6 +185,9 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
       if (isset(static::$typeMappings[$type])) {
         $this->preprocessorParameters['content_models'] = array(static::$typeMappings[$type]['content_model']);
         $this->preprocessorParameters['parent'] = static::$typeMappings[$type]['collection'];
+      }
+      else {
+        drush_log(t('Unable to determine the type for @file.', array('@file' => $this->objectInfo['xml']->uri)));
       }
     }
     else {
@@ -211,17 +214,17 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
       static::$typeMappings = array(
         'dc' => array(
           'content_model' => 'ir:undergraduateETDCModel',
-          'collection' => 'ir:citation',
+          'collection' => 'ir:honorsThesesCollection',
           'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/DC_MODS3-4_XSLT1-0.xsl',
         ),
         'etd-ms' => array(
           'content_model' => 'ir:graduateETDCModel',
-          'collection' => 'ir:citation',
+          'collection' => 'ir:GraduateThesesCollection',
           'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
         'modstext' => array(
-          'content_model' => 'ir:undergraduateETDCModel',
-          'collection' => 'ir:citation',
+          'content_model' => 'bc:citationCModel',
+          'collection' => 'ir:citationCollection',
           'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
         'modsvideo' => array(
@@ -276,6 +279,11 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
           else {
             $type = 'modstext';
           }
+        }
+        else {
+          // There are no entity types defined in the MODS citation collection
+          // case, thus we will handle the fallback as modstext.
+          $type = 'modstext';
         }
       }
       return $type;
