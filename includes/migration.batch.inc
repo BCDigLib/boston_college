@@ -361,7 +361,7 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         if (isset($this->objectInfo['xml']->streaming_url)) {
           $mods_xpath = simplexml_load_string($mods_xml);
           $mods_xpath->registerXPathNamespace('mods', 'http://www.loc.gov/mods/v3');
-          $location_xpath = $mods_xpath->xpath('mods:mods/mods:location/mods:url');
+          $location_xpath = $mods_xpath->xpath('/mods:mods/mods:location/mods:url');
           if (!$location_xpath) {
             $url_element = $mods_doc->createElement('mods:url');
             $location_element = $mods_doc->createElement('mods:location');
