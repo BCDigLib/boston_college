@@ -21,12 +21,31 @@
  * @see hook_islandora_derivative()
  */
 function boston_college_update_object_label_from_mods_derivative(AbstractObject $object, $force = FALSE) {
-  $mods_xml = new SimpleXMLElement($object['MODS']->content);
-  $mods_xml->registerXPathNamespace('mods', 'http://www.loc.gov/mods/v3');
-  $title = $mods_xml->xpath('/mods:mods/mods:titleInfo/mods:title');
-  $title = reset($title);
-  if ($title && $object->label != $title) {
-    $object->label = $title;
+  $mods_doc = new DOMDocument();
+  $mods_doc->loadXML($object['MODS']->content);
+  $xpath = new DOMXPath($mods_doc);
+  $xpath->registerNamespace('mods', 'http://www.loc.gov/mods/v3');
+  $title_infos = $xpath->query('/mods:mods/mods:titleInfo');
+  if ($title_infos->length === 0) {
+    return array(
+      'success' => FALSE,
+      'messages' => array(
+        array(
+          'message' => t('Failed to find mods:titleInfo to update the label of @pid.'),
+          'message_sub' => array(
+            '@pid' => $object->id,
+          ),
+          'type' => 'dsm',
+        ),
+      ),
+    );
+  }
+  $title_info = $title_infos->item(0);
+  $title = $xpath->evaluate('string(mods:title)', $title_info);
+  $non_sort = $xpath->evaluate('string(mods:nonSort)', $title_info);
+  $label = "$non_sort$title";
+  if ($label && $object->label != $label) {
+    $object->label = $label;
   }
   return array(
     'success' => TRUE,
