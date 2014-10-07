@@ -115,7 +115,7 @@ function boston_college_islandora_derivative(AbstractObject $object = NULL) {
       'file' => "$mod_path/includes/splash.inc",
     );
     $derivatives[] = array(
-      'source_dsid' => 'ARCHIVE-PDF',
+      'source_dsid' => BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID,
       'destination_dsid' => 'TECHMD',
       'weight' => '1',
       'function' => array(
