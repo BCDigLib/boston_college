@@ -3,6 +3,7 @@ description = "Misc customizations for Boston College"
 package = Islandora
 dependencies[] = islandora_scholar
 dependencies[] = islandora_batch
+dependencies[] = islandora_fits
 files[] = includes/migration.batch.inc
 version = 7.x-dev
 core = 7.x
