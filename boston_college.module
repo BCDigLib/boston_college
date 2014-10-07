@@ -114,6 +114,15 @@ function boston_college_islandora_derivative(AbstractObject $object = NULL) {
       ),
       'file' => "$mod_path/includes/splash.inc",
     );
+    $derivatives[] = array(
+      'source_dsid' => 'ARCHIVE-PDF',
+      'destination_dsid' => 'TECHMD',
+      'weight' => '1',
+      'function' => array(
+        'islandora_fits_create_techmd',
+      ),
+      'file' => drupal_get_path('module', 'islandora_fits') . '/includes/derivatives.inc',
+    );
     $derivatives = array_merge($derivatives, islandora_scholar_get_derivatives());
     foreach ($derivatives as &$derivative) {
       if ($derivative['source_dsid'] == 'PDF') {
