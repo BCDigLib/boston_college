@@ -484,7 +484,10 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     $creation_xpath = $xml->xpath('/xb:digital_entity_result/xb:digital_entity/control/creation_date/text()');
     if ($creation_xpath) {
       $date = (string) reset($creation_xpath);
+      $old_tz = date_default_timezone_get();
+      date_default_timezone_set('America/New_York');
       $formatted_date = gmdate("Y-m-d\TH:i:s\Z", strtotime($date));
+      date_default_timezone_set($old_tz);
       $this->relationships->add(ISLANDORA_RELS_EXT_URI, 'digiToolCreationDate', $formatted_date, RELS_TYPE_DATETIME);
     }
     else {
