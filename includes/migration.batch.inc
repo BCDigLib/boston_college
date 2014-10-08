@@ -377,7 +377,7 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         }
         $mods_xml = $mods_doc->saveXML();
         $mods_datastream = $this->constructDatastream('MODS', 'M');
-        $mods_datastream->mimetype = 'text/xml';
+        $mods_datastream->mimetype = 'application/xml';
         $mods_datastream->label = 'MODS Record';
         $mods_datastream->content = $mods_xml;
         $this->ingestDatastream($mods_datastream);
