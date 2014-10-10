@@ -10,7 +10,7 @@
  */
 function boston_college_drush_command() {
   return array(
-    'boston_college_batch_process' => array(
+    'boston_college_ingest_preprocess' => array(
       'description' => t('Prepare a directory for ingest.'),
       'drupal dependencies' => array('boston_college'),
       'options' => array(
@@ -20,7 +20,7 @@ function boston_college_drush_command() {
         ),
       ),
       'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_LOGIN,
-      'examples' => array('drush -v boston_college_batch_process --target=/home/user/site_data'),
+      'examples' => array('drush -v boston_college_ingest_preprocess --target=/home/user/site_data'),
     ),
     'boston_college_update_handles' => array(
       'description' => t('Update existing Handles to point at new Islandora object URLs. Subsquent runs of this command should only go back and update Handles that do not return a success code from the initial run.'),
@@ -46,7 +46,7 @@ function boston_college_drush_command() {
 /**
  * Run the directory processing.
  */
-function drush_boston_college_batch_process() {
+function drush_boston_college_ingest_preprocess() {
   $preprocessor = new BostonCollegeBatchPreprocessor(
     islandora_get_tuque_connection(),
     array(
