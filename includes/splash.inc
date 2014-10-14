@@ -102,6 +102,8 @@ function boston_college_run_fop($input_mods) {
   touch(drupal_realpath($output));
   $args = array(
     variable_get('boston_college_fop_executable', '/usr/bin/fop'),
+    '-c',
+    drupal_realpath(drupal_get_path('module', 'boston_college') . '/data/fop/cfg.xml'),
     '-xml',
     '-',
     '-xsl',
