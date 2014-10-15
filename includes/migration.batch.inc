@@ -158,22 +158,22 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         'dc' => array(
           'content_model' => 'ir:undergraduateETDCModel',
           'collection' => 'ir:honorsThesesCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/DC_MODS3-4_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/DC_MODS3-4_XSLT1-0.xsl',
         ),
         'etd-ms' => array(
           'content_model' => 'ir:graduateETDCModel',
           'collection' => 'ir:GraduateThesesCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/ETDMS_MODS3-4_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
         'modstext' => array(
           'content_model' => 'bc:citationCModel',
           'collection' => 'ir:citationCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
         'modsvideo' => array(
           'content_model' => BOSTON_COLLEGE_VIDEO_CONTENT_MODEL,
           'collection' => 'ir:citation',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
       );
     }
@@ -215,22 +215,22 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         'dc' => array(
           'content_model' => 'ir:undergraduateETDCModel',
           'collection' => 'ir:honorsThesesCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/DC_MODS3-4_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/DC_MODS3-4_XSLT1-0.xsl',
         ),
         'etd-ms' => array(
           'content_model' => 'ir:graduateETDCModel',
           'collection' => 'ir:GraduateThesesCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/ETDMS_MODS3-4_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
         'modstext' => array(
           'content_model' => 'bc:citationCModel',
           'collection' => 'ir:citationCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
         'modsvideo' => array(
           'content_model' => BOSTON_COLLEGE_VIDEO_CONTENT_MODEL,
           'collection' => 'ir:citation',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
       );
     }
