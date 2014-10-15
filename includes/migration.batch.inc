@@ -59,32 +59,39 @@ class BostonCollegeBatchPreprocessor extends IslandoraScanBatch {
                 drush_log(t('Unable to determine relation pid for @file, skipping.', array('@file' => $file_object->uri)));
                 break;
               }
-              // Need to retrieve the filename from the linked xml.
-              if (isset($ref["$pid.xml"])) {
-                $linked_file = simplexml_load_file($ref["$pid.xml"]);
-                $linked_file->registerXPathNamespace('xb', 'http://com/exlibris/digitool/repository/api/xmlbeans');
-                $file_xpath = $linked_file->xpath('/xb:digital_entity_result/xb:digital_entity/stream_ref/file_name');
-                if ($file_xpath) {
-                  $file = (string) reset($file_xpath);
-                  // Need to do a kind of dumb find and replace to account
-                  // for a case where there is an apostrophe in the file.
-                  $file = str_replace("'", '', $file);
-                  if (isset($ref[$file])) {
-                    $related_file = $file;
+              $relation_entity_xpath = $relation->xpath('entity_type');
+              $relation_type_xpath = $relation->xpath('usage_type');
+              if ($relation_entity_xpath && $relation_type_xpath) {
+                $rel_usage_type = (string) reset($relation_type_xpath);
+                $rel_entity_type = (string) reset($relation_entity_xpath);
+                // Only care about related items that are documents that are
+                // archives.
+                if ($rel_entity_type == 'DOCUMENT' && $rel_usage_type == 'ARCHIVE') {
+                  // Need to retrieve the filename from the linked xml.
+                  if (isset($ref["$pid.xml"])) {
+                    $linked_file = simplexml_load_file($ref["$pid.xml"]);
+                    $linked_file->registerXPathNamespace('xb', 'http://com/exlibris/digitool/repository/api/xmlbeans');
+                    $file_xpath = $linked_file->xpath('/xb:digital_entity_result/xb:digital_entity/stream_ref/file_name');
+                    if ($file_xpath) {
+                      $file = (string) reset($file_xpath);
+                      // Need to do a kind of dumb find and replace to account
+                      // for a case where there is an apostrophe in the file.
+                      $file = str_replace("'", '', $file);
+                      if (isset($ref[$file])) {
+                        $related_file = $file;
+                      }
+                      else {
+                        drush_log(t('The related file @related is not present for @file.', array(
+                          '@related' => $file,
+                          '@file' => $file_object->uri,
+                        )));
+                      }
+                    }
                   }
                   else {
-                    drush_log(t('The related file @related is not present for @file.', array(
-                      '@related' => $file,
-                      '@file' => $file_object->uri,
-                    )));
+                    drush_log(t('Unable to find linked document for @file.', array('@file' => $file_object->uri)));
                   }
                 }
-              }
-              else {
-                drush_log(t('Unable to find linked document for @file with digiTool PID of @pid.', array(
-                  '@file' => $file_object->uri,
-                  '@pid' => $pid,
-                )));
               }
               if ($pid && $related_file) {
                 if (isset($ref[$related_file])) {
@@ -151,22 +158,22 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         'dc' => array(
           'content_model' => 'ir:undergraduateETDCModel',
           'collection' => 'ir:honorsThesesCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/DC_MODS3-4_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/DC_MODS3-4_XSLT1-0.xsl',
         ),
         'etd-ms' => array(
           'content_model' => 'ir:graduateETDCModel',
           'collection' => 'ir:GraduateThesesCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/ETDMS_MODS3-4_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
         'modstext' => array(
           'content_model' => 'bc:citationCModel',
           'collection' => 'ir:citationCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
         'modsvideo' => array(
           'content_model' => BOSTON_COLLEGE_VIDEO_CONTENT_MODEL,
           'collection' => 'ir:citation',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
       );
     }
@@ -208,22 +215,22 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         'dc' => array(
           'content_model' => 'ir:undergraduateETDCModel',
           'collection' => 'ir:honorsThesesCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/DC_MODS3-4_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/DC_MODS3-4_XSLT1-0.xsl',
         ),
         'etd-ms' => array(
           'content_model' => 'ir:graduateETDCModel',
           'collection' => 'ir:GraduateThesesCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/ETDMS_MODS3-4_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
         'modstext' => array(
           'content_model' => 'bc:citationCModel',
           'collection' => 'ir:citationCollection',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
         'modsvideo' => array(
           'content_model' => BOSTON_COLLEGE_VIDEO_CONTENT_MODEL,
           'collection' => 'ir:citation',
-          'transform' => drupal_get_path('module', 'boston_college') . '/data/transforms/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
+          'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
       );
     }

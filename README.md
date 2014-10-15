@@ -21,7 +21,11 @@ Install as usual, see [this](https://drupal.org/documentation/install/modules-th
 
 ## Configuration
 
-None, yet.
+Apache FOP requires TTF-FreeFont to be used for unicode compliant Sans Serif fonts.
+
+It can be installed by typing:
+
+```sudo apt-get install ttf-freefont```
 
 ## Troubleshooting/Issues
 
