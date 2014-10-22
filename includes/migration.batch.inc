@@ -247,9 +247,7 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     if ($this->type == 'dc') {
       $this->addEventHistory();
     }
-    if ($this->type == 'etd-ms') {
-      $this->addArchivalRelease();
-    }
+    $this->addArchivalRelease();
     if ($this->type == 'modsvideo') {
       $this->addArchivalVideo();
     }
