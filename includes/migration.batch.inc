@@ -167,12 +167,12 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         ),
         'modstext' => array(
           'content_model' => 'bc:citationCModel',
-          'collection' => 'ir:citationCollection',
+          'collection' => 'bc-ir:citationCollection',
           'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
         'modsvideo' => array(
           'content_model' => BOSTON_COLLEGE_VIDEO_CONTENT_MODEL,
-          'collection' => 'ir:citation',
+          'collection' => 'bc-ir:videoCollection',
           'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
       );
@@ -224,12 +224,12 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
         ),
         'modstext' => array(
           'content_model' => 'bc:citationCModel',
-          'collection' => 'ir:citationCollection',
+          'collection' => 'bc-ir:citationCollection',
           'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
         'modsvideo' => array(
           'content_model' => BOSTON_COLLEGE_VIDEO_CONTENT_MODEL,
-          'collection' => 'ir:citation',
+          'collection' => 'bc-ir:videoCollection',
           'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/MODS/MODS-digitool_MODS3-4-islandora_XSLT1-0.xsl',
         ),
       );
