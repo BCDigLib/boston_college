@@ -8,8 +8,8 @@
 define('BOSTON_COLLEGE_ARCHIVAL_PDF_DATASTREAM_ID', 'ARCHIVE-PDF');
 define('BOSTON_COLLEGE_VIDEO_CONTENT_MODEL', 'islandora:BCVideo');
 define('BOSTON_COLLEGE_VIDEO_FORM', 'BC Video MODS Form');
-define('BOSTON_COLLEGE_GRADUATE_THESIS_CONTENT_MODEL', 'ir:graduateETDCModel');
-define('BOSTON_COLLEGE_UNDERGRADUATE_THESIS_CONTENT_MODEL', 'ir:undergraduateETDCModel');
+define('BOSTON_COLLEGE_GRADUATE_THESIS_CONTENT_MODEL', 'bc-ir:graduateETDCModel');
+define('BOSTON_COLLEGE_UNDERGRADUATE_THESIS_CONTENT_MODEL', 'bc-ir:undergraduateETDCModel');
 define('BOSTON_COLLEGE_CITATION_CONTENT_MODEL', 'bc:citationCModel');
 define('BOSTON_COLLEGE_THESIS_CONTENT_MODEL', 'bc:thesisCModel');
 
@@ -231,7 +231,7 @@ function boston_college_islandora_required_objects(IslandoraTuque $connection) {
   $graduate_thesis_content_model->ingestDatastream($datastream);
 
   // Graduate Theses Collection.
-  $graduate_collection = $connection->repository->constructObject('ir:GraduateThesesCollection');
+  $graduate_collection = $connection->repository->constructObject('bc-ir:GraduateThesesCollection');
   $graduate_collection->owner = 'fedoraAdmin';
   $graduate_collection->label = 'Graduate ETDs';
   $graduate_collection->models = 'islandora:collectionCModel';
@@ -265,7 +265,7 @@ function boston_college_islandora_required_objects(IslandoraTuque $connection) {
   $undergraduate_thesis_content_model->ingestDatastream($datastream);
 
   // Undergraduate Honors Theses Collection.
-  $undergraduate_collection = $connection->repository->constructObject('ir:honorsThesesCollection');
+  $undergraduate_collection = $connection->repository->constructObject('bc-ir:UndergraduateThesesCollection');
   $undergraduate_collection->owner = 'fedoraAdmin';
   $undergraduate_collection->label = 'Undergraduate Honors Theses';
   $undergraduate_collection->models = 'islandora:collectionCModel';

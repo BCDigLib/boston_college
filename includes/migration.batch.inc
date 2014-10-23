@@ -156,13 +156,13 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     if (!static::$typeMappings) {
       static::$typeMappings = array(
         'dc' => array(
-          'content_model' => 'ir:undergraduateETDCModel',
-          'collection' => 'ir:honorsThesesCollection',
+          'content_model' => 'bc-ir:undergraduateETDCModel',
+          'collection' => 'bc-ir:UndergraduateThesesCollection',
           'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/DC_MODS3-4_XSLT1-0.xsl',
         ),
         'etd-ms' => array(
-          'content_model' => 'ir:graduateETDCModel',
-          'collection' => 'ir:GraduateThesesCollection',
+          'content_model' => 'bc-ir:graduateETDCModel',
+          'collection' => 'bc-ir:GraduateThesesCollection',
           'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
         'modstext' => array(
@@ -213,12 +213,12 @@ class BostonCollegeBatchObject extends IslandoraScanBatchObject {
     if (!static::$typeMappings) {
       static::$typeMappings = array(
         'dc' => array(
-          'content_model' => 'ir:undergraduateETDCModel',
-          'collection' => 'ir:honorsThesesCollection',
+          'content_model' => 'bc-ir:undergraduateETDCModel',
+          'collection' => 'bc-ir:UndergraduateThesesCollection',
           'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/DC_MODS3-4_XSLT1-0.xsl',
         ),
         'etd-ms' => array(
-          'content_model' => 'ir:graduateETDCModel',
+          'content_model' => 'bc-ir:graduateETDCModel',
           'collection' => 'ir:GraduateThesesCollection',
           'transform' => '/opt/BC-Islandora-Implementation/MetadataCrosswalks/ETD/ETDMS_MODS3-4_XSLT1-0.xsl',
         ),
