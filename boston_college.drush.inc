@@ -40,6 +40,18 @@ function boston_college_drush_command() {
       ),
       'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_LOGIN,
     ),
+    'boston_college_update_dc' => array(
+      'description' => t('Update existing the Dublin Core of existing objects to use a consistent XSL for transforming.'),
+      'drupal depdencies' => array(
+        'islandora',
+        'xml_form_builder',
+        'boston_college',
+      ),
+      'examples' => array(
+        'drush -u 1 boston_college_update_dc' => t('Update existing Dublin Core.'),
+      ),
+      'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_LOGIN,
+    ),
   );
 }
 
@@ -83,5 +95,29 @@ function boston_college_update_handles_create_batch($base_url) {
     'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaining @estimate.'),
     'error_message' => t('An error has occurred.'),
     'file' => drupal_get_path('module', 'boston_college') . '/includes/handle.batch.inc',
+  );
+}
+
+/**
+ * Update Dublin Core on objects.
+ */
+function drush_boston_college_update_dc() {
+  batch_set(boston_college_update_dc_batch());
+  drush_backend_batch_process();
+}
+
+/**
+ * Constructs a batch to update Dublin Core via batch.
+ */
+function boston_college_update_dc_batch() {
+  return array(
+    'operations' => array(
+      array('boston_college_update_dc_batch_operation', array()),
+    ),
+    'title' => t('Updating Dublin Core for objects...'),
+    'init_message' => t('Preparing to update Dublin Core.'),
+    'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaining @estimate.'),
+    'error_message' => t('An error has occurred.'),
+    'file' => drupal_get_path('module', 'boston_college') . '/includes/dc.batch.inc',
   );
 }
