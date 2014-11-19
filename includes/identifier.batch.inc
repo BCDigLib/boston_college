@@ -57,11 +57,11 @@ EOQ;
     if (!$existence) {
       $object = islandora_object_load($pid);
       $dom = new DOMDocument();
+      $dom->formatOutput = TRUE;
+      $dom->preserveWhiteSpace = FALSE;
       $dom->loadXML($object['DC']->content);
       $element = $dom->createElementNS('http://purl.org/dc/elements/1.1/', 'dc:identifier', $pid);
       $dom->documentElement->appendChild($element);
-      $dom->formatOutput = TRUE;
-      $dom->preserveWhiteSpace = FALSE;
       $object['DC']->content = $dom->saveXML();
       drush_log(dt('Updated the dc:identifier for @pid.', array('@pid' => $pid)));
     }
