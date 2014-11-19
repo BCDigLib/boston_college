@@ -70,7 +70,7 @@ function boston_college_drush_command() {
         'boston_college',
       ),
       'examples' => array(
-        'drush -u 1 boston_college_update_dc_identifier' => t('Update existing dc:identifiers.'),
+        'drush -u 1 boston_college_update_dc_identifier_again' => t('Update existing dc:identifiers.'),
       ),
       'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_LOGIN,
     ),
@@ -172,7 +172,7 @@ function boston_college_update_dc_identifier_batch() {
  * Update dc:identifiers on objects again.
  */
 function drush_boston_college_update_dc_identifier_again() {
-  batch_set(boston_college_update_dc_identifier_batch());
+  batch_set(boston_college_update_dc_identifier_again_batch());
   drush_backend_batch_process();
 }
 
