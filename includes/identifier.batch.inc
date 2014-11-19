@@ -114,6 +114,8 @@ EOQ;
     $pid = $result['obj']['value'];
     $object = islandora_object_load($pid);
     $dom = new DOMDocument();
+    $dom->formatOutput = TRUE;
+    $dom->preserveWhiteSpace = FALSE;
     $dom->loadXML($object['DC']->content);
     $xpath = new DOMXPath($dom);
     $xpath->registerNamespace('dc', 'http://purl.org/dc/elements/1.1/');
@@ -126,8 +128,6 @@ EOQ;
         $parent->appendChild($element);
       }
     }
-    $dom->formatOutput = TRUE;
-    $dom->preserveWhiteSpace = FALSE;
     $object['DC']->content = $dom->saveXML();
     drush_log(dt('Updated the dc:identifier for @pid.', array('@pid' => $pid)));
   }
