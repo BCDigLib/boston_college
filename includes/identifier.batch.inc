@@ -42,9 +42,8 @@ EOQ;
   ));
   $results = $tuque->repository->ri->sparqlQuery($limited_query);
   $identifier_query = <<<EOQ
-SELECT ?identifier FROM <#ri> WHERE {
-  <info:fedora/!pid> <dc:identifier> ?identifier
-  FILTER(sameTerm(?identifier, '!pid'))
+ASK {
+  <info:fedora/!pid> <dc:identifier> '!pid'
 }
 EOQ;
   foreach ($results as $result) {
@@ -52,7 +51,9 @@ EOQ;
     // to do nicely in a query.
     $pid = $result['obj']['value'];
     $object_query = format_string($identifier_query, array('!pid' => $pid));
-    $existence = $tuque->repository->ri->countQuery($object_query, 'sparql');
+    $result = $tuque->repository->ri->sparqlQuery($object_query);
+    $answer = reset($result);
+    $existence = $answer['k0']['value'] == 'true';
     if (!$existence) {
       $object = islandora_object_load($pid);
       $dom = new DOMDocument();
