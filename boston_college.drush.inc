@@ -63,6 +63,17 @@ function boston_college_drush_command() {
       ),
       'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_LOGIN,
     ),
+    'boston_college_update_dc_identifier_again' => array(
+      'description' => t('Update the missing dc:identifiers on objects.'),
+      'drupal depdencies' => array(
+        'islandora',
+        'boston_college',
+      ),
+      'examples' => array(
+        'drush -u 1 boston_college_update_dc_identifier' => t('Update existing dc:identifiers.'),
+      ),
+      'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_LOGIN,
+    ),
   );
 }
 
