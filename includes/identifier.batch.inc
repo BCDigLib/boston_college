@@ -53,7 +53,7 @@ EOQ;
     $pid = $result['obj']['value'];
     $object_query = format_string($identifier_query, array('!pid' => $pid));
     $existence = $tuque->repository->ri->countQuery($object_query, 'sparql');
-    if ($existence) {
+    if (!$existence) {
       $object = islandora_object_load($pid);
       $dom = new DOMDocument();
       $dom->loadXML($object['DC']->content);
