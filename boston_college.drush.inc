@@ -52,6 +52,17 @@ function boston_college_drush_command() {
       ),
       'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_LOGIN,
     ),
+    'boston_college_update_dc_identifier' => array(
+      'description' => t('Update the missing dc:identifiers on objects.'),
+      'drupal depdencies' => array(
+        'islandora',
+        'boston_college',
+      ),
+      'examples' => array(
+        'drush -u 1 boston_college_update_dc_identifier' => t('Update existing dc:identifiers.'),
+      ),
+      'bootstrap' => DRUSH_BOOTSTRAP_DRUPAL_LOGIN,
+    ),
   );
 }
 
@@ -119,5 +130,29 @@ function boston_college_update_dc_batch() {
     'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaining @estimate.'),
     'error_message' => t('An error has occurred.'),
     'file' => drupal_get_path('module', 'boston_college') . '/includes/dc.batch.inc',
+  );
+}
+
+/**
+ * Update dc:identifiers on objects.
+ */
+function drush_boston_college_update_dc_identifier() {
+  batch_set(boston_college_update_dc_identifier_batch());
+  drush_backend_batch_process();
+}
+
+/**
+ * Constructs a batch to update dc:identifiers.
+ */
+function boston_college_update_dc_identifier_batch() {
+  return array(
+    'operations' => array(
+      array('boston_college_update_dc_identifier_batch_operation', array()),
+    ),
+    'title' => t('Updating dc:identifiers for objects...'),
+    'init_message' => t('Preparing to update Dublin Core.'),
+    'progress_message' => t('Time elapsed: @elapsed <br/>Estimated time remaining @estimate.'),
+    'error_message' => t('An error has occurred.'),
+    'file' => drupal_get_path('module', 'boston_college') . '/includes/identifier.batch.inc',
   );
 }
