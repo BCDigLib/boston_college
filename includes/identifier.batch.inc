@@ -62,6 +62,7 @@ EOQ;
       $dom->documentElement->appendChild($element);
       $dom->formatOutput = TRUE;
       $dom->preserveWhiteSpace = FALSE;
+      $object['DC']->content = $dom->saveXML();
       drush_log(dt('Updated the dc:identifier for @pid.', array('@pid' => $pid)));
     }
     else {
