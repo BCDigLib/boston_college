@@ -448,3 +448,12 @@ function boston_college_upload_access($object) {
   return is_object($object) && count(array_intersect($allowed_models, $object->models)) > 0 &&
     islandora_object_access(ISLANDORA_ADD_DS, $object);
 }
+
+/**
+ * Implements hook_islandora_handle_get_xsl_files().
+ */
+function boston_college_islandora_handle_get_xsl_files() {
+  return array(
+    drupal_get_path('module', 'boston_college') . '/xml/boston_college_handle_the_mods.xsl' => 'Boston College MODS',
+  );
+}
