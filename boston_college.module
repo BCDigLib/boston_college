@@ -434,6 +434,11 @@ function boston_college_islandora_BCVideo_islandora_view_object(AbstractObject $
 function boston_college_islandora_view_object(AbstractObject $object) {
   if (array_intersect(boston_college_citation_models(), $object->models)) {
     module_load_include('inc', 'islandora_scholar', 'includes/utilities');
+
+     module_load_include('inc', 'boston_college', 'includes/google_scholar.metatags');
+     $tags = boston_college_islandora_google_scholar_create_meta_tags($object);
+     islandora_google_scholar_embed_tags($tags);
+
     return islandora_scholar_get_view($object);
   }
 }
