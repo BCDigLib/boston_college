@@ -20,7 +20,6 @@ function boston_college_document_upload_ingest_step_form($form, &$form_state) {
   boston_college_document_upload_form_base($form, isset($step_storage['values']) ? $step_storage['values'] : array());
   $form['upload_document'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Upload Document'),
     '#states' => array(
       'visible' => array(
         ':input[name="upload_pdf_checkbox"]' => array('checked' => TRUE),
