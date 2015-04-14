@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mods:mods xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" version="3.5" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
-    <mods:accessCondition type="restriction on access">I hereby grant to Boston College the right to include and preserve my thesis in electronic form in the Boston College Institutional Repository, which shall include the right to make my thesis available to authenticated members of the Boston College Community and to anyone accessing it digitally on any Boston College campus.</mods:accessCondition>    
-</mods:mods>    
+<licenseAgreement type="campus only">
+    <licenseTerms>I hereby grant to Boston College the right to include and preserve my thesis in electronic form in the Boston College Institutional Repository, which shall include the right to make my thesis available to authenticated members of the Boston College Community and to anyone accessing it digitally on any Boston College campus.</licenseTerms>
+</licenseAgreement>
