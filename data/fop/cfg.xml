@@ -45,7 +45,7 @@ the location of this file.
             </filterList>
 
             <fonts>
-                <directory>/usr/share/fonts/truetype/freefont</directory>
+                <directory recursive="true">/usr/share/fonts</directory>
                 <auto-detect/>
                 <!-- embedded fonts -->
                 <!--
