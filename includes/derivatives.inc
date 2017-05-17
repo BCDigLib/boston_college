@@ -43,7 +43,7 @@ function boston_college_update_object_label_from_mods_derivative(AbstractObject 
   $title_info = $title_infos->item(0);
   $title = $xpath->evaluate('string(mods:title)', $title_info);
   $non_sort = $xpath->evaluate('string(mods:nonSort)', $title_info);
-  $label = "$non_sort$title";
+  $label = "$non_sort $title";
   if ($label && $object->label != $label) {
     $object->label = $label;
   }
