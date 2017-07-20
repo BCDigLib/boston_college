@@ -100,8 +100,9 @@ function boston_college_build_pdf($object, $force, $hook) {
 function boston_college_run_fop($input_mods) {
   $output = file_create_filename('splash.pdf', 'temporary://');
   touch(drupal_realpath($output));
+
   $args = array(
-    variable_get('boston_college_fop_executable', '/usr/bin/fop'),
+    variable_get('boston_college_fop_executable', '/home/jazairi/fop/fop'),
     '-c',
     drupal_realpath(drupal_get_path('module', 'boston_college') . '/data/fop/cfg.xml'),
     '-xml',
@@ -112,6 +113,7 @@ function boston_college_run_fop($input_mods) {
     drupal_realpath($output),
   );
   $escaped_args = array_map('escapeshellarg', $args);
+
   $descriptors = array(
     0 => array('pipe', 'r'),
     1 => array('pipe', 'w'),
@@ -126,13 +128,12 @@ function boston_college_run_fop($input_mods) {
   fwrite($pipes[0], $input_mods);
   fclose($pipes[0]);
 
+  // An exit code getter that foils proc_close's chicanery
   $status = proc_get_status($proc);
-  while ($status['running'] === TRUE) {
-    $status = proc_get_status($proc);
-  }
-  proc_close($proc);
+  $exit_code = proc_close($proc);
+  $actual_exit_code = ($status["running"] ? $exit_code : $status["exitcode"] );
 
-  if ($status['exitcode'] !== 0) {
+  if ($actual_exit_code !== 0) {
     unlink($output);
     return FALSE;
   }
@@ -180,18 +181,15 @@ function boston_college_concat_pdfs(array $input_pdfs) {
   $pipes = array();
   $proc = proc_open(implode(' ', $escaped_args), $descriptors, $pipes);
 
-  // Close ALL the pipes! :V
   fclose($pipes[0]);
   fclose($pipes[1]);
   fclose($pipes[2]);
 
   $status = proc_get_status($proc);
-  while ($status['running'] === TRUE) {
-    $status = proc_get_status($proc);
-  }
-  proc_close($proc);
+  $exit_code = proc_close($proc);
+  $actual_exit_code = ($status['running'] ? $exit_code : $status['exitcode'] );
 
-  if ($status['exitcode'] !== 0) {
+  if ($actual_exit_code !== 0) {
     unlink($output);
     return FALSE;
   }
