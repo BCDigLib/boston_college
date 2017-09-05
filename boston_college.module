@@ -164,7 +164,7 @@ function boston_college_islandora_datastream_purged(AbstractObject $object, $dsi
   }
 
   module_load_include('inc', 'islandora', 'includes/utilities');
-  $hooks = islandora_invoke_hook_list(ISLANDORA_DERVIATIVE_CREATION_HOOK, $object->models, array($object));
+  $hooks = islandora_invoke_hook_list(ISLANDORA_DERIVATIVE_CREATION_HOOK, $object->models, array($object));
 
   $hook_filter = function ($hook_def) use ($purge_derived_dsids) {
     return isset($hook_def['source_dsid']) && isset($hook_def['destination_dsid']) ?
