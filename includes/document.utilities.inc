@@ -33,8 +33,8 @@ function boston_college_document_upload_form_base(&$form, $defaults = array()) {
     $upload['statement'] = array(
         '#type' => 'item',
         '#markup' => t('This submission form applies only to text-based faculty publications. Please upload the associated document in PDF format and indicate the version of the document by checking one of the boxes below. If you are interested in depositing other materials (such as videos or datasets), please contact !john_link or !chris_link.', array(
-        '!john_link' => l(t('John O'Connor'), 'mailto:john.oconnor.15@bc.edu'),
-        '!chris_link' => l(t('Chris Mayo'), 'mailto:chris.mayo@bc.edu'),
+        '!john_link' => l(t("John O'Connor"), 'mailto:john.oconnor.15@bc.edu'),
+        '!chris_link' => l(t("Chris Mayo"), 'mailto:chris.mayo@bc.edu'),
         )),
     );
   }
@@ -113,7 +113,7 @@ Boston College will clearly identify my/our name(s) as the author(s) or owner(s)
     $upload['note'] = array(
         '#type' => 'markup',
         '#markup' => t('<strong>Note</strong>:  If you have retained full rights to your work, we encourage you to use a Creative Commons license when submitting your work. To allow Boston College to display a Creative Commons license with your submission, please contact !email_link. Keep in mind that if you have signed a Copyright Transfer Agreement when publishing your work, you may not be able to do so.', array(
-        '!email_link' => l(t('John O'Connor'), 'mailto:john.oconnor.15@bc.edu'),
+        '!email_link' => l(t("John O'Connor"), 'mailto:john.oconnor.15@bc.edu'),
         )),
     );
     $statement = <<<EOSTMT
