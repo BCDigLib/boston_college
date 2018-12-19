@@ -5,6 +5,7 @@
  */
 
 define('HONORS_ROLE',isset($GLOBALS['user']->roles[6]) ? $GLOBALS['user']->roles[6] : NULL);
+define('STL_ROLE',isset($GLOBALS['user']->roles[8]) ? $GLOBALS['user']->roles[8] : NULL);
 
 /**
  * Build up the form base in the given form.
@@ -29,7 +30,7 @@ function boston_college_document_upload_form_base(&$form, $defaults = array()) {
   
   $upload =& $form['upload_document'];
   
-  if (!HONORS_ROLE) {
+  if (!HONORS_ROLE && !STL_ROLE) {
     $upload['statement'] = array(
         '#type' => 'item',
         '#markup' => t('This submission form applies only to text-based faculty publications. Please upload the associated document in PDF format and indicate the version of the document by checking one of the boxes below. If you are interested in depositing other materials (such as videos or datasets), please contact !john_link or !chris_link.', array(
@@ -48,7 +49,7 @@ function boston_college_document_upload_form_base(&$form, $defaults = array()) {
     ),
   );
   
-  if (HONORS_ROLE) {
+  if (HONORS_ROLE || STL_ROLE) {
     $upload['license'] = array(
         '#type' => 'item',
         '#title' => t('LICENSE AGREEMENT'),
@@ -104,7 +105,7 @@ If the submission is based upon work that has been sponsored or supported by an 
 Boston College will clearly identify my/our name(s) as the author(s) or owner(s) of the submission, and will not edit the text of the submission.'),
     ); 
   }
-  if (!HONORS_ROLE) {
+  if (!HONORS_ROLE && !STL_ROLE) {
     $upload['agree'] = array(
         '#type' => 'checkbox',
         '#title' => t('I agree to all of the statements above.'),
@@ -163,7 +164,7 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
   $pdf_datastream->setContentFromFile($pdf_file->uri);
   $object->ingestDatastream($pdf_datastream);
 
-  if (HONORS_ROLE) {
+  if (HONORS_ROLE || STL_ROLE) {
     // Add Honors Agreement 
     $dsid = 'ARCHIVE';         
     $datastream = $object->constructDatastream($dsid, 'X');
@@ -203,7 +204,7 @@ function boston_college_upload_document_apply(array $values, AbstractObject $obj
         'Other',
   );
   
-  if(!HONORS_ROLE) {
+  if(!HONORS_ROLE && !STL_ROLE) {
     if (!in_array($values['version'], $no_map)) {
         $document_version = $mods_doc->createElementNS($mods_root->namespaceURI, 'note');
         $document_version->setAttribute('type', 'version identification');
